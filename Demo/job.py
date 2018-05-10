@@ -10,8 +10,8 @@ import json
 
 logger = logging.getLogger('py4j')
 
-targetPath="s3://srfrnk-doit/parquet/"
-kinesisStreamName='srfrnk_doit'
+targetPath="s3://potgiet-nytaxi-bucket/parquet/"
+kinesisStreamName='nytaxi-stream'
 
 def write_lines(rdd):
     # Since messages may not always be sent we may receive empty RDDs which must be ignored to prevent exceptions.

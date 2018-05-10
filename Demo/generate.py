@@ -9,7 +9,7 @@ from boto import kinesis
 
 logger = logging.getLogger('py4j')
 
-kinesisStreamName='srfrnk_doit'
+kinesisStreamName='nytaxi-stream'
 
 def write_partition(partition):
         # Access the Kinesis client object
