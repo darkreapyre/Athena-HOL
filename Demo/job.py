@@ -40,15 +40,15 @@ if __name__ == "__main__":
 
     # Define an external hive table from the PARQUET files stored in S3 to be used to retrieve the schema of the data.
     # The schema will be used to parse the messages coming from the Kinesis stream and thus must match it.
-    sqlContext.sql("CREATE EXTERNAL TABLE IF NOT EXISTS yellow_trips_schema(" +
+    sqlContext.sql("CREATE EXTERNAL TABLE IF NOT EXISTS nytaxi_schema(" +
                    "pickup_timestamp BIGINT, dropoff_timestamp BIGINT, vendor_id STRING, pickup_datetime TIMESTAMP, dropoff_datetime TIMESTAMP, pickup_longitude FLOAT, pickup_latitude FLOAT, dropoff_longitude FLOAT, dropoff_latitude FLOAT, rate_code STRING, passenger_count INT, trip_distance FLOAT, payment_type STRING, fare_amount FLOAT, extra FLOAT, mta_tax FLOAT, imp_surcharge FLOAT, tip_amount FLOAT, tolls_amount FLOAT, total_amount FLOAT, store_and_fwd_flag STRING) " +
                    "STORED AS parquet " +
-                   "LOCATION 's3://nyc-yellow-trips/parquet/'")
+                   "LOCATION 's3://us-west-2.serverless-analytics/canonical/NY-Pub'")
 
     ssc = StreamingContext(sc, 1)
 
     # Create an RDD of a single row just to get the schema. No data will be actually read except for the schema.
-    table=sqlContext.sql("select * from yellow_trips_schema limit 1");
+    table=sqlContext.sql("select * from nytaxi_schema limit 1");
 
     # Connect to the Kinesis stream - create an RDD of stream messages
     lines = KinesisUtils.createStream(ssc, appName, kinesisStreamName,

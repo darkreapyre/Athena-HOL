@@ -6,7 +6,7 @@
 
 In this lab, you are going to build a serverless architecture to analyze the data directly from Amazon S3 using [Amazon Athena](https://aws.amazon.com/athena/) and visualize the data in [Amazon QuickSight](https://quicksight.aws/). The data set that you are going to use is a public data set that includes trip records from all trips completed in Yellow and Green taxis in NYC from 2009 to 2016, and all trips in for-hire vehicles (FHV) from 2015 to 2016\. Records include fields capturing pick-up and drop-off dates/times, pick-up and drop-off locations, trip distances, itemized fares, rate types, payment types, and driver-reported passenger counts. The data set is already partitioned and converted from CSV to Apache Parquet. In the first part of the lab you will be building SQL like queries using Amazon Athena to query both the data formats directly form Amazon S3 and comparing the query performance. In the second part, using Amazon Athena table, create in first part, as the data source for Amazon QuickSight you will generate visualization and meaningful insights from the data set in Amazon S3. An optional lab is included to incorporate serverless ETL using AWS Glue to optimize query performance. We also give you access to a take-home lab for you to reapply the same design and directly query the same dataset in Amazon S3 from an Amazon Redshift data warehouse using Redshift Spectrum\.
 
-![architecture-overview.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/architectureoveriew.PNG)
+![architecture-overview.png](./Assets/Overview.png)
 
 ---
 
@@ -41,15 +41,15 @@ The AWS region name is always listed in the upper-right corner of the AWS Manage
 
 ### Pre-requisites
 
-[Create a new AWS Account](https://aws.amazon.com/free/) if you don't have one. 
+- [Working, non-production AWS Account](https://aws.amazon.com/free/) if you don't have one. 
  
 
 |Lab|Name|
 |---|----|
-|Lab 1|[Serverless Analysis of data in Amazon S3 using Amazon Athena](./Lab1)|
-|Lab 2|[Visualization using Amazon QuickSight](./Lab2)|
-|Lab 3|[Serverless ETL and Data Discovery using Amazon Glue](./Lab3)|
-|Lab 4|[Analysis of data in Amazon S3 using Amazon Redshift Spectrum](./Lab4)|
+|Lab 1|[Analysis of data in Amazon S3 using Amazon Athena](./Lab1)|
+|Lab 2|[Serverless ETL and Data Discovery using Amazon Glue](./Lab2)|
+|Lab 3|[Visualization using Amazon QuickSight](./Lab3)|
+|Lab 4|[Athena Query Optimization](./Lab4)|
 
 
 ## AMAZON ATHENA
@@ -95,7 +95,7 @@ Traditional BI solutions often require teams of data engineers to spend months b
 You can connect to AWS data sources including Amazon RDS, Amazon Aurora, Amazon Redshift, Amazon Athena and Amazon S3\. You can also upload Excel spreadsheets or flat files (CSV, TSV, CLF, and ELF), connect to on-premises databases like SQL Server, MySQL and PostgreSQL and import data from SaaS applications like Salesforce.
 
 For more details refer [Amazon QuickSight FAQ](https://quicksight.aws/resources/faq/)
-
+<!--
 ## Amazon Redshift Spectrum
 
 ### What is Amazon Redshift Spectrum?
@@ -122,7 +122,7 @@ If you have frequently accessed data, that needs to be stored in a consistent, h
 Yes, Redshift Spectrum can support the same Apache Hive Metastore used by Amazon EMR to locate data and table definitions. If you’re using Amazon EMR and have a Hive Metastore already, you just have to configure your Amazon Redshift cluster to use it. You can then start querying that data right away along with your Amazon EMR jobs.
 
 For more details refer [Amazon Redshift Spectrum FAQ](https://aws.amazon.com/redshift/faqs/) 
-
+-->
 ## AWS Glue
 
 ### What is AWS Glue?
@@ -165,15 +165,10 @@ For more details refer [AWS Glue FAQ](https://aws.amazon.com/glue/faqs/)
 
 ## **ADDITIONAL RESOURCES**
 
-### Amazon Athena:
-
 - <https://aws.amazon.com/blogs/big-data/top-10-performance-tuning-tips-for-amazon-athena/>
 - <http://docs.aws.amazon.com/athena/latest/ug/convert-to-columnar.html>
-
-### Redshift Spectrum
-- https://aws.amazon.com/blogs/big-data/10-best-practices-for-amazon-redshift-spectrum/
-
-### Serverless Analysis Architecture Blogs:
+- <https://aws.amazon.com/blogs/big-data/streamline-aws-cloudtrail-log-visualization-using-aws-glue-and-amazon-quicksight/>
+- <https://aws.amazon.com/blogs/big-data/build-a-data-lake-foundation-with-aws-glue-and-amazon-s3/>
 - <https://aws.amazon.com/blogs/big-data/derive-insights-from-iot-in-minutes-using-aws-iot-amazon-kinesis-firehose-amazon-athena-and-amazon-quicksight/>
 - <https://aws.amazon.com/blogs/big-data/build-a-serverless-architecture-to-analyze-amazon-cloudfront-access-logs-using-aws-lambda-amazon-athena-and-amazon-kinesis-analytics/>
 

@@ -1,265 +1,242 @@
-# Lab 4: Analysis of data in Amazon S3 using Amazon Redshift Spectrum
+# Lab 4: Athena Query Optmization
 
-* [Deploying Amazon Redshift Cluster](#deploying-amazon-redshift-cluster)
-* [Running AWS Glue Crawlers](#running-aws-glue-crawlers---csv--parquet-crawler)
-* [Create Redshift Spectrum Scehma and reference external table form AWS Glue Data Catalog Database](#create-redshift-spectrum-scehma-and-reference-external-table-form-aws-glue-data-catalog-database)
-* [Querying data from Amazon S3 using Amazon Redshift Spectrum](#querying-data-from-amazon-s3-using-amazon-redshift-spectrum)
-* [Querying partitioned data using Amazon Redshift Spectrum](#querying-partitioned-data-using-amazon-redshift-spectrum)
+* TOC
 
+## Querying partitioned data using Amazon Athena (Continuation from Lab 1)
 
-## Architectural Diagram
-![architecture-overview-lab4.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-17+at+1.11.45+AM.png)
+By partitioning your data, you can restrict the amount of data scanned by each query, thus improving performance and reducing cost. Athena leverages Hive for [partitioning](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL#LanguageManualDDL-AlterPartition) data. You can partition your data by any key. A common practice is to partition the data based on time, often leading to a multi-level partitioning scheme. For example, a customer who has data coming in every hour might decide to partition by year, month, date, and hour. Another customer, who has data coming from many different sources but loaded one time per day, may partition by a data source identifier and date.
 
-## Deploying Amazon Redshift Cluster 
+### Create a Table with Partitions
 
-In this section you will use the CloudFromation template to create Amazon RedShift cluster resources. The template will also install [pgweb](https://github.com/sosedoff/pgweb), SQL Client for PostgreSQL, in an  Amazon EC2 instance to connect and run your queries on the launched Amazon Redshift cluster. Alternatively, you can connect to the Amazon Redshift cluster using standard SQL Clients such as SQL Workbench/J. For more information refer http://docs.aws.amazon.com/redshift/latest/mgmt/connecting-using-workbench.html.
+1. Ensure that current AWS region is **US West (Oregon)** region
 
-1. Login in to your AWS console and open the [Amazon CloudFormation Dashboard](https://us-west-2.console.aws.amazon.com/cloudformation/home?region=us-west-2]) 
-2. Make a note of the AWS region name, for example, for this lab you will need to choose the **US West (Oregon)** region.
-3. Click **Create Stack**
-4. Select **Specify an Amazon S3 template URL**
-5. Copy paste the following S3 template URL in the text box
-```
-https://s3-us-west-2.amazonaws.com/us-west-2.serverless-data-analytics/labcontent/redshiftspectrumglue-lab4.template
-```
-6. Click **Next**
+2. Ensure **mydatabase** is selected from the DATABASE list and then choose **New Query**.
 
->**Note:** 
->Click on the link [redshiftspectrumglue-lab4.template](../Lab4/redshiftspectrumglue-lab4.template) to view the Amazon CloudFormation template file
+3. In the query pane, copy the following statement to create a the NYTaxiRides table, and then choose **Run Query**:
 
+````sql
+  CREATE EXTERNAL TABLE NYTaxiRides (
+    vendorid STRING,
+    pickup_datetime TIMESTAMP,
+    dropoff_datetime TIMESTAMP,
+    ratecode INT,
+    passenger_count INT,
+    trip_distance DOUBLE,
+    fare_amount DOUBLE,
+    total_amount DOUBLE,
+    payment_type INT
+    )
+  PARTITIONED BY (YEAR INT, MONTH INT, TYPE string)
+  STORED AS PARQUET
+  LOCATION 's3://us-west-2.serverless-analytics/canonical/NY-Pub'
+````
 
-![IMAGE](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-16+at+7.38.08+PM.png)
+4.Ensure the table you just created appears on the Catalog dashboard for the selected database.
 
-8. Type a name *(e.g. RedshiftSpectrumLab)* for the **Stack Name**
-
-![IMAGE](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-16+at+7.38.39+PM.png)
-
-9. Enter the following **Parameters** for **Redshift Cluster Configuration**
-    
-    1. Choose *multi-node* for **ClusterType**
-    2. Type *2* for the **NumberOfNodes**
-    3. For **NodeType** select *dc1.xlarge*
-
-![IMAGE](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-16+at+7.38.57+PM.png)
-
-10.  Enter the following **Parameters** for **Redshift Database Configuration**.
-    i. Type a name (e.g. dbadmin) for **MasterUserName**.
-    ii. Type a password for **MasterUserPassword**.
-    iii. Type the a name (e.g. taxidb) for **DatabaseName**.
-    iv. Type the IP address of your local machine for **ClientIP**.
-
-![IMAGE](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-16+at+7.39.23+PM.png)
-
-11. Enter the following **Parameters** for **Glue Crawler Configuration**
-    1. Type the name(e.g. taxi-spectrum-db) for **GlueCatalogDBName**.    
-    2. Type the name(e.g. csvCrawler) for **CSVCrawler**.
-    3. Type the name(e.g. parquetCrawler) for **ParquetCrawler**.
-    
-12. Click **Next**
-
-![IMAGE](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-16+at+7.40.04+PM.png)
-
-13. [Optional] In the **Tags** sub-sections in **Options** type a **Key** name *(e.g. Name)* and **Value** for key.
-14. Click **Next**
-
-![IMAGE](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-16+at+7.40.31+PM.png)
-
-15. Check **I acknowledge that AWS CloudFormation might create IAM resources.**
-16. Click **Create**
-
-> **Note:** This is may take approximately 15 minutes 
-
-17. Ensure that status of the Amazon CloudFromation stack that you just create is **CREATE_COMPLETE**
-18. Select your Amazon CloudFormation stack *(RedshiftSpectrumLab)*
-19. Click on the **Outputs** tab
-20. Review the list of **Key** and thier **Value** which will look like the following. 
-
-![IMAGE](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-16+at+7.30.42+PM.png)
-
-## Running AWS Glue Crawlers - CSV & Parquet Crawler 
-1. Open [AWS Management Console for Glue](https://us-west-2.console.aws.amazon.com/glue/home?region=us-west-2#)
-2. Go to AWS Glues Crawlers page by clicking on **Crawlers** in the navigation pane
-
-![IMAGE](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/Screen+Shot+2017-11-17+at+3.02.35+AM.png)
-
-3. Select the AWS Glue Crawler for CSV(e.g. csvCrawler)
-4. Click **Run crawler**
-5. Select the AWS Glue Crawler for CSV(e.g. csvCrawler)
-6. Click **Run crawler**
-
-> Note: This may take approximately 5 min for both the crawlers to parse the data in CSV and Parquet format. 
-
-![IMAGE](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-16+at+11.08.23+PM.png)
-
-7. Wait for the **Status** of both the crawlers to *Ready* state
-
-Now that you have run the crawlers lest ensure that new tables *taxi* and *ny_pub* been created. 
-
-8. To to the list of databases in the AWS Glue Data Catalog click on **Databases** in the navigation pane.
-9. Click on **taxi-spectrum-db**
-
-![IMAGE](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-16+at+11.09.32+PM.png)
-
-10. Click on **Tables in taxi-spectrum-db**
-
-![IMAGE](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-16+at+11.09.50+PM.png)
-
-11. Click on **taxi** to review the table definition and schema 
-12. Navigate back and click on **ny_pub** to review the table definition and schema
+![athenatablecreatequery-nytaxi.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenatablecreatequery-nytaxi.png)
 
 >**Note:**
->The good news is that you don’t have to create a new table or definition to read the CSV document we just looked at. With AWS Glue crawlers, you have already inferred the schema and created tables namely taxi and ny_pub.
+>	Running the following sample query on the NYTaxiRides table you just created will not return any result as no metadata about the partition is added to the Amazon Athena table catalog.  
+>```sql 
+>   SELECT * FROM NYTaxiRides limit 10
+>``` 
 
-13. Click on **View partitions** to review the partition metadata
+### Adding partition metadata to Amazon Athena
+
+Now that you have created the table you need to add the partition metadata to the Amazon Athena Catalog.
+
+1. Choose **New Query**, copy the following statement into the query pane, and then choose **Run Query** to add partition metadata.
+
+```sql
+    MSCK REPAIR TABLE NYTaxiRides
+```
+The returned result will contain information for the partitions that are added to NYTaxiRides for each taxi type (yellow, green, fhv) for every month for the year from 2009 to 2016
 
 >**Note:**
-> The major advantage of Glue Crawlers is that they understand the partitions based on the S3 object prefix and automatically create the table with partitions as part of the crawling. 
+> The MSCK REPAIR TABLE automatically adds partition data based on the New York taxi ride data to in the Amazon S3 bucket is because the data is already converted to Apache Parquet format partitioned by year, month and type, where type is the taxi type (yellow, green or fhv). If the data layout does not confirm with the requirements of MSCK REPAIR TABLE the alternate approach is to add each partition manually using ALTER TABLE ADD PARTITION. You can also automate adding partitions by using the JDBC driver.
 
-## Create Redshift Spectrum Scehma and reference external table form AWS Glue Data Catalog Database
-
-1. Open the [Amazon CloudFormation Dashboard](https://us-west-2.console.aws.amazon.com/cloudformation/home?region=us-west-2]) 
-2. Make a note of the AWS region name, for example, for this lab you will need to choose the **US West (Oregon)** region.
-3. Select your Amazon CloudFormation stack *(RedshiftSpectrumLab)*
-4. Click on the **Outputs** tab
-5. Naviage to the **pgWeb** URL
-6. In the pgWeb console ensure that the **SQL Query** tab is selected
-7. Copy the following statement to create a database *(e.g. taxispectrum)* in Redshift Spectrum
-
-```sql
-  create external schema taxispectrum from data catalog
-  database 'taxi-spectrum-db' 
-  iam_role '<specify the redshift IAM Role arn from the CloudFormation outputs section>'
-```
-8. Replace the *<specify the redshift IAM Role arn from the CloudFormation output section'>* in the statment with the value of **redshiftIAMRole** from the **Outputs** tab of the Amazon CloudFromation stack *(RedshiftSpectrumLab)* you created as part of the lab.
-9. 
-> Note: The IAM role must be in single quotes
-
-9. Click **Run Query**
-
-> Note: You can create an external table in Amazon Redshift, AWS Glue, Amazon Athena, or an Apache Hive metastore. For more information, see [Getting Started Using AWS Glue](http://docs.aws.amazon.com/glue/latest/dg/getting-started.html) in the AWS Glue Developer Guide, [Getting Started](http://docs.aws.amazon.com/athena/latest/ug/getting-started.html) in the Amazon Athena User Guide, or [Apache Hive](http://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-hive.html) in the Amazon EMR Developer Guide.If your external table is defined in AWS Glue, Athena, or a Hive metastore, you first create an external schema that references the external database. Then you can reference the external table in your SELECT statement by prefixing the table name with the schema name, without needing to create the table in Amazon Redshift. For more information, see [Creating External Schemas for Amazon Redshift Spectrum](http://docs.aws.amazon.com/redshift/latest/dg/c-spectrum-external-schemas.html.)
-
-## Querying data from Amazon S3 using Amazon Redshift Spectrum
-
-Now that you have created the schema, you can run queries on the data set and see the results in PGWeb Console.
-
-1. Copy the following statement into the query pane, and then choose **Run Query**.
-
-```sql
-    SELECT * FROM taxispectrum.taxi limit 10
-```
-
-Results for the above query look like the following:
-
-![Screen Shot 2017-11-14 at 9.16.45 PM.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-14+at+9.16.45+PM.png)
-
-2.	Copy the following statement into the query pane, and then choose **Run Query** to get the total number of taxi rides for yellow cabs. 
-
-```sql
-    SELECT COUNT(1) as TotalCount FROM taxispectrum.taxi
-```
-Results for the above query look like the following:
-
-![Screen Shot 2017-11-14 at 9.25.23 PM.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-14+at+9.25.23+PM.png)
-
-3. Copy the following statement into the query pane, and then choose **Run Query** to query for the number of rides per vendor, along with the average fair amount for yellow taxi rides
-
-```sql
-    SELECT 
-    CASE vendorid 
-         WHEN '1' THEN 'Creative Mobile Technologies'
-         WHEN '2' THEN 'VeriFone Inc'
-         ELSE CAST(vendorid as VARCHAR) END AS Vendor,
-    COUNT(1) as RideCount, 
-    avg(total_amount) as AverageAmount
-    FROM taxispectrum.taxi
-    WHERE total_amount > 0
-    GROUP BY (1)
-```
-
-Results for the above query look like the following:
-
-![Screen Shot 2017-11-14 at 9.46.55 PM.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-14+at+9.46.55+PM.png)
-
-## Querying partitioned data using Amazon Redshift Spectrum
-
-By partitioning your data, you can restrict the amount of data scanned by each query, thus improving performance and reducing cost. Amazon Redshift Spectrum leverages Hive for [partitioning](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL#LanguageManualDDL-AlterPartition) data. You can partition your data by any key. A common practice is to partition the data based on time, often leading to a multi-level partitioning scheme. For example, a customer who has data coming in every hour might decide to partition by year, month, date, and hour. Another customer, who has data coming from many different sources but loaded one time per day, may partition by a data source identifier and date.
-
+### Querying partitioned data set
 
 Now that you have added the partition metadata to the Athena data catalog you can now run your query.
 
-1. Copy the following statement into the query pane, and then choose **Run Query** to get the total number of taxi rides
+1. Choose **New Query**, copy the following statement into the query pane, and then choose **Run Query** to get the total number of taxi rides
 
 ```sql
-    SELECT count(1) as TotalCount from taxispectrum.ny_pub
+    SELECT count(1) as TotalCount from NYTaxiRides
 ```
 Results for the above query look like the following:
 
-![Screen Shot 2017-11-14 at 10.08.50 PM.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-14+at+10.08.50+PM.png)
+![athenacountquery-nytaxi.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenacountquery-nytaxi.png)
 
 >**Note:**
-> This query executes much faster because the data set is partitioned and it in optimal format - Apache Parquet (an open source columnar).
+> This query executes much faster because the data set is partitioned and it in optimal format - Apache Parquet (an open source columnar). Following is a comparison of the execution time and amount of data scanned between the data formats:
+>
+>>**CSV Format:**
+>>```sql
+>>  SELECT count(*) as count FROM TaxiDataYellow 
+>>```
+>>Run time: **~20.06 seconds**, Data scanned: **~207.54GB**, Count: **1,310,911,060**
+>>```sql
+>>SELECT * FROM TaxiDataYellow limit 1000
+>>```
+>>Run time: **~3.13 seconds**, Data scanned: **~328.82MB**
+>
+>>**Parquet Format:**
+>>```sql
+>>SELECT count(*) as count FROM NYTaxiRides
+>>```
+>>Run time: **~5.76 seconds**, Data scanned: **0KB**, Count: **2,870,781,820**
+>>```sql
+>>SELECT * FROM NYTaxiRides limit 1000
+>>```
+>>Run time: **~1.13 seconds**, Data scanned: **5.2MB**
 
-2. Copy the following statement into the query pane, and then choose **Run Query** to get the total number of taxi rides by year
+
+2. Choose **New Query**, copy the following statement into the query pane, and then choose **Run Query** to get the total number of taxi rides by year
 
 ```sql
-    SELECT YEAR, count(1) as TotalCount from taxispectrum.ny_pub GROUP BY YEAR
+    SELECT YEAR, count(1) as TotalCount from NYTaxiRides GROUP BY YEAR
 ```
-Results for the above query look like the following:
-![Screen Shot 2017-11-14 at 10.11.47 PM.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-14+at+10.11.47+PM.png)
 
-3. Copy the following statement into the query pane, and then choose **Run Query** to get the top 12 months by total number of rides across all the years
+Results for the above query look like the following:
+![athenagroupbyyearquery-nytaxi.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenagroupbyyearquery-nytaxi.png)
+
+3. Choose **New Query**, copy the following statement into the query pane, and then choose **Run Query** to get the top 12 months by total number of rides across all the years
 
 ```sql
     SELECT YEAR, MONTH, COUNT(1) as TotalCount 
-    FROM taxispectrum.ny_pub
+    FROM NYTaxiRides 
     GROUP BY (1), (2) 
     ORDER BY (3) DESC LIMIT 12
 ```
 Results for the above query look like the following:
-![Screen Shot 2017-11-14 at 10.13.54 PM.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-14+at+10.13.54+PM.png)
 
-4. Copy the following statement into the query pane, and then choose **Run Query** to get the monthly ride counts per taxi time for the year 2016.
+![athenacountbyyearquery-nytaxi.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenacountbyyearquery-nytaxi.png)
+
+4. Choose **New Query**, copy the following statement into the query pane, and then choose **Run Query** to get the monthly ride counts per taxi time for the year 2016.
 
 ```sql
     SELECT MONTH, TYPE, COUNT(1) as TotalCount 
-    FROM taxispectrum.ny_pub
+    FROM NYTaxiRides 
     WHERE YEAR = 2016 
     GROUP BY (1), (2)
     ORDER BY (1), (2)
 ```
 Results for the above query look like the following:
-![Screen Shot 2017-11-14 at 10.18.08 PM.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-14+at+10.18.08+PM.png)
 
-5. Copy the following statement anywhere into the query pane, and then choose **Run Query**.
+![athenagroupbymonthtypequery-nytaxi.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenagroupbymonthtypequery-nytaxi.png)
+
+>**Note:**
+Now the execution time is ~ 3 second, as the amount of data scanned by the query is restricted thus improving performance. This is because the data set is partitioned and it in optimal format – Apache Parquet, an open source columnar format.
+
+5. Choose **New Query**, copy the following statement anywhere into the query pane, and then choose **Run Query**.
 
 ```sql
-    SELECT MONTH, TYPE,
-      avg(trip_distance) avgDistance,
-      avg(total_amount/trip_distance) avgCostPerMile,
-      avg(total_amount) avgCost,
-      percentile_cont(0.99)
-      within group (order by total_amount)
-    FROM taxispectrum.ny_pub
-    WHERE YEAR = 2016 AND (TYPE = 'yellow' OR TYPE = 'green')
-    AND trip_distance > 0 AND total_amount > 0
+    SELECT MONTH,
+      TYPE,
+      avg(trip_distance) as  avgDistance,
+      avg(total_amount/trip_distance) as avgCostPerMile,
+      avg(total_amount) as avgCost, 
+      approx_percentile(total_amount, .99) percentile99
+    FROM NYTaxiRides
+    WHERE YEAR = 2016 AND (TYPE = 'yellow' OR TYPE = 'green') AND trip_distance > 0 AND total_amount > 0
     GROUP BY MONTH, TYPE
     ORDER BY MONTH
 ```
-
 Results for the above query look like the following:
 
-![Screen Shot 2017-11-14 at 10.23.51 PM.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab4/Screen+Shot+2017-11-14+at+10.23.51+PM.png)
+![athenapercentilequery-nytaxi.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenapercentilequery-nytaxi.png)
 
-## Deleting the Amazon CloudFormation Stack
+## Query the Columnar Data using Amazon Athena (Continuation from Lab 2)
 
-Now that you have successfully queried the dataset using Amazon Redshift Spectrum, you need to tear down the stack that you deployed using the Amazon CloudFormation template.
+In regions where AWS Glue is supported, Athena uses the AWS Glue Data Catalog as a central location to store and retrieve table metadata throughout an AWS account. The Athena execution engine requires table metadata that instructs it where to read data, how to read it, and other information necessary to process the data. The AWS Glue Data Catalog provides a unified metadata repository across a variety of data sources and data formats, integrating not only with Athena, but with Amazon S3, Amazon RDS, Amazon Redshift, Amazon Redshift Spectrum, Amazon EMR, and any application compatible with the Apache Hive metastore.
 
-1. Open the [Amazon CloudFormation Dashboard](https://us-west-2.console.aws.amazon.com/cloudformation/home?region=us-west-2) 
-2. Enable the check box next to the name of the stack *(e.g. RedshiftSpectrumLab)* that you deployed at the beginingo fo the Lab. 
-3. Click on **Actions** drop down button.
-4. Select **Delete Stack**'
-5. Click **Yes, Delete** on the *Delete Stack* pop dialog
-6. Ensure that Amazon CloudFromation stack name *(e.g. RedshiftSpectrumLab)* is no longer showing in the list of stacks.
+1. Open the [AWS Management console for Amazon Athena](https://us-west-2.console.aws.amazon.com/athena/home?force&region=us-west-2). 
+
+   > Ensure you are in the **US West (Oregon)** region. 
+
+2. Under Database, you should see the database **nycitytaxianalysis-reinv17** which was created during the previous section. 
+
+3. Click on **Create Table** right below the drop-down for Database and click on **Automatically (AWS Glue Crawler)**.
+
+4. You will now be re-directed to the AWS Glue console to set up a crawler. The crawler connects to your data store and automatically determines its structure to create the metadata for your table. Click on **Continue**.
+
+5. Enter Crawler name as **nycitytaxianalysis-crawlerparquet-reinv17** and Click **Next**.
+
+6. Select Data store as **S3**.
+
+7. Choose Crawl data in **Specified path in my account**.
+
+8. For Include path, click on the folder Icon and choose the **target** folder previously made which contains the parquet data and click on **Next**.
+
+![glue18](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_18.PNG)
+
+9. In Add another data store, choose **No** and click on **Next**.
+
+10. For Choose an IAM role, select Choose an existing IAM role, and in the drop-down pick the role made in the previous section and click on **Next**.
+
+11. In Create a schedule for this crawler, pick frequency as **Run on demand** and click on **Next**.
+
+12. For Configure the crawler's output, Click **Add Database** and enter **nycitytaxianalysis-reinv17-parquet** as the database name and click **create**. For Prefix added to tables, you can enter a prefix **parq_** and click **Next**.
+
+13. Review the Crawler Info and click **Finish**. Click on **Run it Now?**. 
+
+14. Click on **Tables** on the left, and for database nycitytaxianalysis-reinv17-parquet you should see the table parq_target. Click on the table name and you will see the MetaData for this converted table. 
+
+15. Open the [AWS Management console for Amazon Athena](https://us-west-2.console.aws.amazon.com/athena/home?force&region=us-west-2). 
+
+    > Ensure you are in the **US West (Oregon)** region. 
+
+16. Under Database, you should see the database **nycitytaxianalysis-reinv17-parquet** which was just created. Select this database and you should see under Tables **parq_target**.
+
+17. In the query editor on the right, type
+
+    ```
+    select count(*) from parq_target;
+    ```
+
+    and take note the Run Time and Data scanned numbers here. 
+
+    ![glue19](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_comp_scanresult.PNG)
+
+    What we see is the Run time and Data scanned numbers for Amazon Athena to **query and scan the parquet data**.
+
+18. Under Database, you should see the earlier made database **nycitytaxianalysis-reinv17** which was created in a previous section. Select this database and you should see under Tables **reinv17_yellow**. 
+
+19. In the query editor on the right, type
+
+    ```
+    select count(*) from reinv17_yellow;
+    ```
+
+    and take note the Run Time and Data scanned numbers here. 
+
+    ![glue20](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_uncomp_scanresult.PNG)
+
+20. What we see is the Run time and Data scanned numbers for Amazon Athena to query and scan the uncompressed data from the previous section.
+
+
+> Note: Athena charges you by the amount of data scanned per query. You can save on costs and get better performance if you partition the data, compress data, or convert it to columnar formats such as Apache Parquet.
+
+## Deleting the Glue database, crawlers and ETL Jobs created for this Lab
+
+Now that you have successfully discovered and analyzed the dataset using Amazon Glue and Amazon Athena, you need to delete the resources created as part of this lab. 
+
+1. Open the [AWS Management console for Amazon Glue](https://us-west-2.console.aws.amazon.com/glue/home?region=us-west-2#). Ensure you are in the Oregon region (as part of this lab).
+2. Click on **Databases** under Data Catalog column on the left. 
+3. Check the box for the Database that were created as part of this lab. Click on **Action** and select **Delete Database**. And click on **Delete**. This will also delete the tables under this database. 
+4. Click on **Crawlers** under Data Catalog column on the left. 
+5. Check the box for the crawler that were created as part of this lab. Click on **Action** and select **Delete Crawler**. And click on **Delete**. 
+6. Click on **Jobs** under ETL column on the left. 
+7. Check the box for the jobs that were created as part of this lab. Click on **Action** and select **Delete**. And click on **Delete**. 
+8. Open the [AWS Management console for Amazon S3](https://s3.console.aws.amazon.com/s3/home).
+9. Click on the S3 bucket that was created as part of this lab. You need to click on its corresponding **Bucket icon** to select the bucket instead of opening the bucket. Click on **Delete bucket** button on the top, to delete the S3 bucket. In the pop-up window, Type the name of the bucket (that was created as part of this lab), and click **Confirm**. 
+
+## Summary
+
+In the lab, you went from data discovery to analyzing a canonical dataset, without starting and setting up a single server. You started by crawling a dataset you didn’t know anything about and the crawler told you the structure, columns, and counts of records.
+
+From there, you saw the datasets were in different formats, but represented the same thing: NY City Taxi rides. You then converted them into a canonical (or normalized) form that is easily queried through Athena and possible in QuickSight, in addition to a wide number of different tools not covered in this post.
 
 ---
 ## License
