@@ -46,11 +46,11 @@ Create an IAM role that has permission to your Amazon S3 sources, targets, tempo
 
    and it would be easier to choose/select this bucket for the remainder of this Lab. 
 
-   i.Select the region as **Oregon**. 
-   ii. Click **Next** to navigate to next tab. 
-   iii. In the **Set properties** tab, leave all options as default. 
-   iv. In the **Set permissions** tag, leave all options as default.
-   v. In the **Review** tab, click on **Create Bucket**
+   i.Select the region as **Oregon**.  
+   ii. Click **Next** to navigate to next tab.  
+   iii. In the **Set properties** tab, leave all options as default.  
+   iv. In the **Set permissions** tag, leave all options as default. 
+   v. In the **Review** tab, click on **Create Bucket**.  
 
 ![createbucketpopup.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/createbucketpopup.png)
 
