@@ -4,9 +4,6 @@
 * [Create an Amazon S3 bucket](#create-an-amazon-s3-bucket)
 * [Discover the Data](#discover-the-data)
 * [Optimize the Queries and convert into Parquet](#optimize-the-queries-and-convert-into-parquet)
-* [Query the Partitioned Data using Amazon Athena](#query-the-partitioned-data-using-amazon-athena)
-* [Deleting the Glue database, crawlers and ETL Jobs created for this Lab](#deleting-the-glue-database-crawlers-and-etl-jobs-created-for-this-lab)
-* [Summary](#summary)
 
 ## Architectural Diagram
 ![architecture-overview-lab3.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/Screen+Shot+2017-11-17+at+1.11.32+AM.png)
@@ -32,7 +29,7 @@ Create an IAM role that has permission to your Amazon S3 sources, targets, tempo
 <username>-glue-role
 ```
 
-​	and click Finish.
+​	and click **Create role**.
 
 ## Create an Amazon S3 bucket
 
@@ -44,7 +41,7 @@ Create an IAM role that has permission to your Amazon S3 sources, targets, tempo
 1. In the **Create Bucket** pop-up page, input a unique **Bucket name**. So it’s advised to choose a large bucket name, with many random characters and numbers (no spaces). It will be easier to name your bucket
 
    ```
-   aws-glue-scripts-<username>-us-west-2
+   <username>-glue-scripts-us-west-2
    ```
 
    and it would be easier to choose/select this bucket for the remainder of this Lab. 
@@ -75,7 +72,7 @@ During this workshop, we will focus on one month of the New York City Taxi Recor
 
    ii. Click on the **Add Database** button. 
 
-   iii. Enter the Database name as `taxianalysis-<username>`. You can skip the description and location fields and click on **Create**. 
+   iii. Enter the Database name as `<username>-taxianalysis`. You can skip the description and location fields and click on **Create**. 
 
 3. Click on **Crawlers** under Data Catalog column on the left. 
 
@@ -83,9 +80,9 @@ During this workshop, we will focus on one month of the New York City Taxi Recor
 
    i. Click on **Add Crawler** button. 
 
-   ii. Under Add information about your crawler, for Crawler name type **nycitytaxianalysis-crawler-reinv17**. You can skip the Description and Classifiers field and click on **Next**. 
+   ii. Under Add information about your crawler, for Crawler name type `<username>-taxianalysis-crawler`. You can skip the Description and Classifiers field and click on **Next**. 
 
-   iii. Under Data Store, choose S3. And Ensure the radio button for **Crawl Data in Specified path** is checked. 
+   iii. Under Data Store, choose S3. And Ensure the radio button for **Specified path in another account** is checked. 
 
    iv. For Include path, enter the following S3 path and click on **Next**.
 
@@ -98,16 +95,18 @@ During this workshop, we will focus on one month of the New York City Taxi Recor
    vi. For Choose an IAM Role, select **Create an IAM role** and enter the role name as following and click on **Next**.
 
    ```
-   nycitytaxianalysis-reinv17-crawler
+   <username>-crawler
    ```
+   >__Note:__ The IAM Role Name should resemble `AWSGlueServiceRole-<username>-crawler`.
 
    vii. For Create a schedule for this crawler, choose Frequency as **Run on Demand** and click on **Next**.
 
    viii. Configure the crawler output database and prefix:
 
-   ​	a. For **Database**, select the database created earlier, **nycitytaxianalysis-reinv17**.
+   ​	a. For **Database**, select the database created earlier, `<username>-taxianalysis`.
 
-   ​	b. For **Prefix added to tables (optional)**, type **reinv17_** and click on **Next**.
+   ​	b. For **Prefix added to tables (optional)**, type `<username>` and click on **Next**.
+      >__Note:__ The crawler should take approximately 30 seconds to run.
 
    ​	c. Review configuration and click on **Finish** and on the next page, click on **Run it now** in the green box on the top. 
 
@@ -117,11 +116,11 @@ During this workshop, we will focus on one month of the New York City Taxi Recor
 
 4. Click on **Tables**, under Data Catalog on the left column. 
 
-5. If you look under **Tables**, you can see the three new tables that were created under the database nycitytaxianalysis-reinv17.
+5. If you look under **Tables**, you can see the three new tables that were created under the database `<username>-taxianalysis`.
 
    ![glue4](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_4.PNG)
 
-6. The crawler used the built-in classifiers and identified the tables as CSV, inferred the columns/data types, and collected a set of properties for each table. If you look in each of those table definitions, you see the number of rows for each dataset found and that the columns don’t match between tables. As an example, clicking on the reinv17_yellow table, you can see the yellow dataset for January 2017 with 8.7 million rows, the location on S3, and the various columns found.
+6. The crawler used the built-in classifiers and identified the tables as CSV, inferred the columns/data types, and collected a set of properties for each table. If you look in each of those table definitions, you see the number of rows for each dataset found and that the columns don’t match between tables. As an example, clicking on the `<username>yellow` table, you can see the yellow dataset for January 2017 with 8.7 million rows, the location on S3, and the various columns found.
 
    ![glue5](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_5.PNG)
 
@@ -133,33 +132,36 @@ Create an ETL job to move this data into a query-optimized form. You convert the
 
 2. Click on **Jobs** under ETL on the left column and then click on the **Add Job** button. 
 
-3. Under Job properties, input name as **nycitytaxianalysis-reinv17-yellow**. Since we will be working with only the yellow dataset for this workshop.
+3. Under Job properties, input name as `<username>-taxianalysis-yellow`. Since we will be working with only the yellow dataset for this workshop.
 
-   i. Under  IAM Role, Choose the IAM role created at the beginning of this lab. 
+   i. Under  IAM Role, Choose the IAM role created at the beginning of this lab, e.g. `<username>-glue-role`
 
    x. Under This job runs, choose the radio button for **A proposed script generated by AWS Glue**.
 
-   xi. For Script file name, enter **nycitytaxianalysis-reinv17-yellow**.
+   xi. For **Script file name**, enter `<username>-taxianalysis-yellow`.
 
    > For this workshop, we are only working on the yellow dataset. Feel free to run through these steps to also convert the green and FHV dataset. 
 
-   xii. For S3 path where script is stored, click on the Folder icon and choose the S3 bucket created at the beginning of this workshop. **Choose the newly created S3 bucket via the Folder icon**. 
+   xii. For **ETL language**, choose the radio button for **Python**.
 
-   xiii. For Temporary directory, choose the tmp folder created at the beginning of this workshop. **Choose the S3 bucket via the Folder icon** and click **Next**. 
+   xiii. For S3 path where script is stored, click on the Folder icon and choose the S3 bucket created at the beginning of this workshop. **Choose the newly created S3 bucket via the Folder icon**. 
 
-   > Ensure the temporary bucket is already created/available in your S3 bucket. 
+   xiiiv. For Temporary directory, choose the `tmp` folder created at the beginning of this workshop. **Choose the S3 bucket via the Folder icon** and click **Next**. 
+
+   > **Note:** Ensure the temporary bucket is already created/available in your S3 bucket. 
 
    ![glue15](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_15.PNG)
 
-   xiv. Click on Advanced properties, and select **Enable** for Job bookmark.
-
-   xv. Here's a screenshot of a finished job properties window:
+   xv. Click on Advanced properties, and select **Enable** for Job bookmark.
+<!--
+   xvi. Here's a screenshot of a finished job properties window:
 
    ![glue16](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_16.PNG)
+-->
 
 4. Click **Next**.
 
-5. Under Choose your data sources, select **reinv17_yellow** table as the data source and click on **Next**.
+5. Under Choose your data sources, select `<user>yellow** table as the data source and click on **Next**.
 
    > For this workshop, we are only working on the yellow dataset. Feel free to run through these steps to also convert the green and FHV dataset. 
 
@@ -169,7 +171,7 @@ Create an ETL job to move this data into a query-optimized form. You convert the
 
    ii. For Format, choose **Parquet**.
 
-   iii. For Target path, **click on the folder icon** and choose the target folder previously created. **This S3 Bucket/Folder will contain the transformed Parquet data**.
+   iii. For Target path, **click on the folder icon** and choose the `target` folder previously created. **This S3 Bucket/Folder will contain the transformed Parquet data**.
 
 ![glue17](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_17.PNG)
 
@@ -179,7 +181,9 @@ Create an ETL job to move this data into a query-optimized form. You convert the
 
    ii. Under Target, change the Column name **tpep_dropoff_datetime** to **dropoff_date**. Click on its respective **data type** field string and change the Column type to **TIMESTAMP** and click on **Update**.
 
-   iii. Choose **Next**, verify the information and click **Finish**.
+   iii. Click **Next**.
+
+   iv. Verify the information and click **Save job and edit script**.
 
 ![glue9](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_9.PNG)
 
@@ -198,3 +202,9 @@ Create an ETL job to move this data into a query-optimized form. You convert the
   ![glue12](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_12.PNG)
 
 11. The target folder (S3 Bucket) specified above (step 6 iii) will now have the converted parquet data. 
+
+---
+
+## License
+
+This library is licensed under the Apache 2.0 License. 
