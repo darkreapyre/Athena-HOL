@@ -135,7 +135,7 @@ By partitioning your data, you can restrict the amount of data scanned by each q
 
 1. Ensure that current AWS region is **US West (Oregon)** region
 
-2. Ensure `username`` is selected from the DATABASE list and then choose **New Query**.
+2. Ensure `username` is selected from the DATABASE list and then choose **New Query**.
 
 3. In the query pane, copy the following statement to create a the NYTaxiRides table, and then choose **Run Query**:
 
@@ -160,10 +160,9 @@ CREATE EXTERNAL TABLE TaxiData_parquet (
 
 ![athenatablecreatequery-nytaxi.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenatablecreatequery-nytaxi.png)
 
->**Note:**
->	Running the following sample query on the NYTaxiRides table you just created will not return any result as no metadata about the partition is added to the Amazon Athena table catalog.  
+>**Note:** Running the following sample query on the `TaxiData_parquet` table you just created will not return any result as no metadata about the partition is added to the Amazon Athena table catalog.  
 >```sql 
->   SELECT * FROM TaxiData_parquet limit 10
+>SELECT * FROM TaxiData_parquet limit 10
 >``` 
 
 ### Adding partition metadata to Amazon Athena
