@@ -8,6 +8,7 @@
     * [Create Athena Table with Partitions](#create-a-table-with-partitions)
     * [Adding partition metadata to Amazon Athena](#adding-partition-metadata-to-amazon-athena)
     * [Querying partitioned data set](#querying-partitioned-data-set)
+* [Summary](#summary)
     
 ## Architectural Diagram
 ![architecture-overview-lab1.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/Screen+Shot+2017-11-17+at+1.11.18+AM.png)
@@ -192,7 +193,7 @@ Results for the above query look like the following:
 
 ![athenacountquery-nytaxi.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenacountquery-nytaxi.png)
 
->**Note:**
+<!--**Note:**
 > This query executes much faster because the data set is partitioned and it in optimal format - Apache Parquet (an open source columnar). Following is a comparison of the execution time and amount of data scanned between the data formats:
 >
 >>**CSV Format:**
@@ -214,7 +215,7 @@ Results for the above query look like the following:
 >>SELECT * FROM TaxiData_parquet limit 1000
 >>```
 >>Run time: **~1.1 seconds**, Data scanned: **5.6MB**
-
+-->
 
 2. Choose **New Query**, copy the following statement into the query pane, and then choose **Run Query** to get the total number of taxi rides by year
 
@@ -269,6 +270,20 @@ ORDER BY MONTH
 Results for the above query look like the following:
 
 ![athenapercentilequery-nytaxi.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenapercentilequery-nytaxi.png)
+
+## Summary
+
+This lab has highlighted the following key points:
+1. Creating Databases and Tables using Athena cn be done using either the console wizard or SQL commands.
+2. Partitioning the data improved query significantly as the following table shows:
+
+|             |                    **Query**                   |   **Run Time**   | **Data Scanned** |   **Results**   |
+|-------------|:----------------------------------------------:|:----------------:|:----------------:|:---------------:|
+| **CSV**     | SELECT count(*) as count FROM TaxiData_csv     | ~21.74 seconds | ~207.54GB       | 1,310,911,060 |
+| **Parquet** | SELECT count(*) as count FROM TaxiData_parquet | ~4.79 seconds  | 0KB$            | 2,870,781,820 |
+| **CSV**     | SELECT * FROM TaxiData_csv limit 1000          | ~1.013 seconds | ~479.7MB       | -               |
+| **Parquet** | SELECT * FROM TaxiData_parquet limit 1000      | ~1.1 seconds   | ~5.6MB         | -               |
+
 
 ---
 
