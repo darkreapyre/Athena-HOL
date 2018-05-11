@@ -29,7 +29,7 @@ Create an IAM role that has permission to your Amazon S3 sources, targets, tempo
 6. Enter Role name as 
 
 ```
-nycitytaxianalysis-reinv
+<username>-glue-role
 ```
 
 ​	and click Finish.
@@ -44,10 +44,10 @@ nycitytaxianalysis-reinv
 1. In the **Create Bucket** pop-up page, input a unique **Bucket name**. So it’s advised to choose a large bucket name, with many random characters and numbers (no spaces). It will be easier to name your bucket
 
    ```
-   aws-glue-scripts-<YOURAWSACCOUNTID>-us-west-2
+   aws-glue-scripts-<username>-us-west-2
    ```
 
-   and it would be easier to choose/select this bucket for the remainder of this Lab3. 
+   and it would be easier to choose/select this bucket for the remainder of this Lab. 
 
    i.Select the region as **Oregon**. 
    ii. Click **Next** to navigate to next tab. 
@@ -57,7 +57,7 @@ nycitytaxianalysis-reinv
 
 ![createbucketpopup.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/createbucketpopup.png)
 
-2. Now, in this newly created bucket, create two sub-buckets **tmp** and **target** using the same instructions as the above step. We will use these buckets as part of Lab3 later on. 
+2. Now, in this newly created bucket, create two sub-buckets **tmp** and **target** using the same instructions as the above step. We will use these buckets as part of Lab later on. 
 
 ## Discover the Data
 
@@ -75,7 +75,7 @@ During this workshop, we will focus on one month of the New York City Taxi Recor
 
    ii. Click on the **Add Database** button. 
 
-   iii. Enter the Database name as **nycitytaxianalysis-reinv17**. You can skip the description and location fields and click on **Create**. 
+   iii. Enter the Database name as `taxianalysis-<username>`. You can skip the description and location fields and click on **Create**. 
 
 3. Click on **Crawlers** under Data Catalog column on the left. 
 
