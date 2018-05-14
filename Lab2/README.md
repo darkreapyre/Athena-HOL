@@ -26,13 +26,13 @@ Create an IAM role that has permission to your Amazon S3 sources, targets, tempo
 > Do not click on the policy, you just have to check the corresponding checkbox. 
 
 5. Click on **Next: Review**.
-6. Enter Role name as 
+6. Enter Role name as: 
 
 ```
 <username>-glue-role
 ```
 
-​	and click **Create role**.
+​7. Click **Create role**.
 
 ## Create an Amazon S3 bucket
 
@@ -57,17 +57,19 @@ Create an IAM role that has permission to your Amazon S3 sources, targets, tempo
 
 ![createbucketpopup.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/createbucketpopup.png)
 
-2. Now, in this newly created bucket, create two folders **tmp** and **target**. We will use these buckets as part of Lab later on. 
+2. Now, in this newly created bucket, create two folders **tmp** and **target**. We will use these buckets as part of the Lab later on. 
 
 ## Discover the Data
 
-During this workshop, we will focus on one month of the New York City Taxi Records dataset, however you could easily do this for the entire eight years of data. As you crawl this unknown dataset, you discover that the data is in different formats, depending on the type of taxi. You then convert the data to a canonical form, start to analyze it, and build a set of visualizations. All without launching a single server.
+During this lab, we will focus on one month of the New York City Taxi Records dataset, however you could easily do this for the entire eight years of data. As you crawl this unknown dataset, you discover that the data is in different formats, depending on the type of taxi. You then convert the data to a canonical form, start to analyze it, and build a set of visualizations. All without launching a single server.
 
-> For this lab, you will need to choose the **US West (Oregon)** region. 
+>**Note:** For this lab, you will need to choose the **US West (Oregon)** region. 
 
 1. Open the [AWS Management console for Amazon Glue](https://us-west-2.console.aws.amazon.com/glue/home?region=us-west-2#). 
 
-2. To analyze all the taxi rides for January 2016, you start with a set of data in S3. First, create a database for this workshop within AWS Glue. A database is a set of associated table definitions, organized into a logical group. In Athena, database names are all lowercase, no matter what you type.
+2. To analyze all the taxi rides for January 2016, you start with a set of data in S3. We will use the database that was created during Lab 1. Remember, a database is a set of associated table definitions, organized into a logical group. In Athena, database names are all lowercase, no matter what you type. For more information on Database nameing conventions, see the [Athena Documentation](https://docs.aws.amazon.com/athena/latest/ug/tables-databases-columns-names.html).
+
+>**Note:** If you haven't already created a database in Lab 1, please follow the three steps below to create the database using AWS Glue.
 
    i. Click on **Databases** under Data Catalog column on the left. 
 
@@ -75,9 +77,7 @@ During this workshop, we will focus on one month of the New York City Taxi Recor
 
    ii. Click on the **Add Database** button. 
 
-   iii. Enter the Database name as `<username>_taxianalysis`. You can skip the description and location fields and click on **Create**. 
-
-   >**Note:** Pay special attention to the underscore (_) in the Database name. For more information on Database nameing conventions, see the [Athena Documentation](https://docs.aws.amazon.com/athena/latest/ug/tables-databases-columns-names.html).
+   iii. Enter the Database name as `<username>`. You can skip the description and location fields and click on **Create**. 
 
 3. Click on **Crawlers** under Data Catalog column on the left. 
 
@@ -85,9 +85,9 @@ During this workshop, we will focus on one month of the New York City Taxi Recor
 
    i. Click on **Add Crawler** button. 
 
-   ii. Under Add information about your crawler, for Crawler name type `<username>-taxianalysis-crawler`. You can skip the Description and Classifiers field and click on **Next**. 
+   ii. Under Add information about your crawler, for Crawler name type `<username>-crawler`. You can skip the Description and Classifiers field and click on **Next**. 
 
-   iii. Under Data Store, choose S3. And Ensure the radio button for **Specified path in another account** is checked. 
+   iii. Under Data Store, choose S3 and ensure the radio button for **Specified path in another account** is checked. 
 
    iv. For Include path, enter the following S3 path and click on **Next**.
 
@@ -100,17 +100,18 @@ During this workshop, we will focus on one month of the New York City Taxi Recor
    vi. For Choose an IAM Role, select **Create an IAM role** and enter the role name as following and click on **Next**.
 
    ```
-   <username>-crawler
+   <username>-crawler-role
    ```
-   >__Note:__ The IAM Role Name should resemble `AWSGlueServiceRole-<username>-crawler`.
+   >__Note:__ The IAM Role Name should resemble `AWSGlueServiceRole-<username>-crawler-role`.
 
    vii. For Create a schedule for this crawler, choose Frequency as **Run on Demand** and click on **Next**.
 
    viii. Configure the crawler output database and prefix:
 
-   ​	a. For **Database**, select the database created earlier, `<username>-taxianalysis`.
+   ​	a. For **Database**, select the database created during Lab 1, `<username>`.
 
-   ​	b. For **Prefix added to tables (optional)**, type `<username>` and click on **Next**.
+   ​	b. For **Prefix added to tables (optional)**, type `<username>-` and click on **Next**.
+
       >__Note:__ The crawler should take approximately 30 seconds to run.
 
    ​	c. Review configuration and click on **Finish** and on the next page, click on **Run it now** in the green box on the top. 
@@ -121,11 +122,11 @@ During this workshop, we will focus on one month of the New York City Taxi Recor
 
 4. Click on **Tables**, under Data Catalog on the left column. 
 
-5. If you look under **Tables**, you can see the three new tables that were created under the database `<username>-taxianalysis`.
+5. If you look under **Tables**, you can see the three new tables that were created under the database `<username>`.
 
    ![glue4](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_4.PNG)
 
-6. The crawler used the built-in classifiers and identified the tables as CSV, inferred the columns/data types, and collected a set of properties for each table. If you look in each of those table definitions, you see the number of rows for each dataset found and that the columns don’t match between tables. As an example, clicking on the `<username>yellow` table, you can see the yellow dataset for January 2017 with 8.7 million rows, the location on S3, and the various columns found.
+6. The crawler used the built-in classifiers and identified the tables as CSV, inferred the columns/data types, and collected a set of properties for each table. If you look in each of those table definitions, you see the number of rows for each dataset found and that the columns don’t match between tables. As an example, clicking on the `<username>-yellow` table, you can see the yellow dataset for January 2017 with 8.7 million rows, the location on S3, and the various columns found.
 
    ![glue5](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_5.PNG)
 
@@ -137,21 +138,21 @@ Create an ETL job to move this data into a query-optimized form. You convert the
 
 2. Click on **Jobs** under ETL on the left column and then click on the **Add Job** button. 
 
-3. Under Job properties, input name as `<username>-taxianalysis-yellow`. Since we will be working with only the yellow dataset for this workshop.
+3. Under Job properties, input name as `<username>-yellow-etl`. Since we will be working with only the **yellow** dataset for this workshop.
 
-   i. Under  IAM Role, Choose the IAM role created at the beginning of this lab, e.g. `<username>-glue-role`
+   i. Under IAM Role, Choose the IAM role created at the beginning of this lab, e.g. `<username>-glue-role`
 
    x. Under This job runs, choose the radio button for **A proposed script generated by AWS Glue**.
 
-   xi. For **Script file name**, enter `<username>-taxianalysis-yellow`.
+   xi. For **Script file name**, enter `<username>-yellow-etl`.
 
-   > For this workshop, we are only working on the yellow dataset. Feel free to run through these steps to also convert the green and FHV dataset. 
+   > For this Lab, we are only working on the **yellow** dataset. Feel free to run through these steps to also convert the **green** and **FHV** dataset. 
 
    xii. For **ETL language**, choose the radio button for **Python**.
 
-   xiii. For S3 path where script is stored, click on the Folder icon and choose the S3 bucket created at the beginning of this workshop. **Choose the newly created S3 bucket via the Folder icon**. 
+   xiii. For S3 path where script is stored, click on the Folder icon and choose the S3 bucket created at the beginning of this Lab. **Choose the newly created S3 bucket via the Folder icon**. 
 
-   xiiiv. For Temporary directory, choose the `tmp` folder created at the beginning of this workshop. **Choose the S3 bucket via the Folder icon** and click **Next**. 
+   xiiiv. For Temporary directory, choose the `tmp` folder created at the beginning of this Lab. **Choose the S3 bucket via the Folder icon** and click **Next**. 
 
    > **Note:** Ensure the temporary bucket is already created/available in your S3 bucket. 
 
@@ -166,9 +167,7 @@ Create an ETL job to move this data into a query-optimized form. You convert the
 
 4. Click **Next**.
 
-5. Under Choose your data sources, select `<user>yello` table as the data source and click on **Next**.
-
-   > For this workshop, we are only working on the yellow dataset. Feel free to run through these steps to also convert the green and FHV dataset. 
+5. Under Choose your data sources, select `<username>-yellow` table as the data source and click on **Next**.
 
 6. Under Choose your data targets, select the radio button for **Create tables in your data target**.
 
@@ -216,19 +215,19 @@ In regions where AWS Glue is supported, Athena uses the AWS Glue Data Catalog as
 
    > Ensure you are in the **US West (Oregon)** region. 
 
-2. Under Database, you should see the database **nycitytaxianalysis-reinv17** which was created during the previous section. 
+2. Under Database, you should see the database `<username>` which was created during Lab 1. 
 
 3. Click on **Create Table** right below the drop-down for Database and click on **Automatically (AWS Glue Crawler)**.
 
 4. You will now be re-directed to the AWS Glue console to set up a crawler. The crawler connects to your data store and automatically determines its structure to create the metadata for your table. Click on **Continue**.
 
-5. Enter Crawler name as **nycitytaxianalysis-crawlerparquet-reinv17** and Click **Next**.
+5. Enter Crawler name as `<username>-crawler-parquet` and Click **Next**.
 
 6. Select Data store as **S3**.
 
 7. Choose Crawl data in **Specified path in my account**.
 
-8. For Include path, click on the folder Icon and choose the **target** folder previously made which contains the parquet data and click on **Next**.
+8. For Include path, click on the folder Icon and choose the **target** folder previously made which contains the parquet data, created from the previous section, and click on **Next**.
 
 ![glue18](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_18.PNG)
 
@@ -276,7 +275,6 @@ In regions where AWS Glue is supported, Athena uses the AWS Glue Data Catalog as
 
 20. What we see is the Run time and Data scanned numbers for Amazon Athena to query and scan the uncompressed data from the previous section.
 
-
 > Note: Athena charges you by the amount of data scanned per query. You can save on costs and get better performance if you partition the data, compress data, or convert it to columnar formats such as Apache Parquet.
 
 ## Deleting the Glue database, crawlers and ETL Jobs created for this Lab
@@ -297,7 +295,7 @@ Now that you have successfully discovered and analyzed the dataset using Amazon 
 
 In the lab, you went from data discovery to analyzing a canonical dataset, without starting and setting up a single server. You started by crawling a dataset you didn’t know anything about and the crawler told you the structure, columns, and counts of records.
 
-From there, you saw the datasets were in different formats, but represented the same thing: NY City Taxi rides. You then converted them into a canonical (or normalized) form that is easily queried through Athena and possible in QuickSight, in addition to a wide number of different tools not covered in this post.
+From there, you saw the datasets were in different formats, but represented the same thing: NY City Taxi rides. You then converted them into a canonical (or normalized) form that is easily queried through Athena and possible in QuickSight, in addition to a wide number of different tools not covered in this lab, such as EMR and RedShift.
 
 ---
 
