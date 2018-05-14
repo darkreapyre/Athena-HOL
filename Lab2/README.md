@@ -176,7 +176,7 @@ Create an ETL job to move this data into a query-optimized form. You convert the
 
    ii. For Format, choose **Parquet**.
 
-   iii. For Target path, **click on the folder icon** and choose the `target` folder previously created. **This S3 Bucket/Folder will contain the transformed Parquet data**.
+   iii. For Target path, **click on the folder icon** and choose the `yellow` folder previously created. **This S3 Bucket/Folder will contain the transformed Parquet data**.
 
 ![glue17](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_17.PNG)
 
