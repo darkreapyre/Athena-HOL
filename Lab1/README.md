@@ -31,11 +31,12 @@ Amazon Athena uses Apache Hive to define tables and create databases. Databases 
 ````
 >__Note:__ Where `username` is the AIM user you are logged into the console as.
 
-6.	Ensure *mydatabase* appears in the DATABASE list on the **Catalog** dashboard
+6.	Ensure `<username>`appears in the DATABASE list on the **Catalog** dashboard.
 
 ![athenacatalog.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenacatalog.png)
 
 ### Create a Table
+
 Now that you have a database, you are ready to create a table that is based on the New York taxi sample data. You define columns that map to the data, specify how the data is delimited, and provide the location in Amazon S3 for the file. 
 
 >**Note:** 
@@ -46,11 +47,11 @@ Now that you have a database, you are ready to create a table that is based on t
 >-	Athena does not support different storage classes within the bucket specified by the LOCATION clause, does not support the GLACIER storage class, and does not support Requester Pays buckets. For more information, see [Storage Classes](http://docs.aws.amazon.com/AmazonS3/latest/dev/storage-class-intro.html),[Changing the Storage Class of an Object in Amazon S3](http://docs.aws.amazon.com/AmazonS3/latest/dev/ChgStoClsOfObj.html), and [Requester Pays Buckets](http://docs.aws.amazon.com/AmazonS3/latest/dev/RequesterPaysBuckets.html) in the Amazon Simple Storage Service Developer Guide.
 
 1. Ensure that current AWS region is **US West (Oregon)** region
-2. Ensure the `username` database is selected from the **DATABASE** list and then choose **New Query**.
+2. Ensure the `<username>` database is selected from the **DATABASE** list and then choose **New Query**.
 3. In the query pane, copy the following statement to create TaxiDataYellow table, and then choose **Run Query**:
 
 ````sql
-CREATE EXTERNAL TABLE IF NOT EXISTS TaxiData_csv(
+CREATE EXTERNAL TABLE IF NOT EXISTS taxi_csv(
     VendorID STRING,
     tpep_pickup_datetime TIMESTAMP,
     tpep_dropoff_datetime TIMESTAMP,
@@ -90,7 +91,7 @@ Now that you have created the table, you can run queries on the data set and see
 1. Choose **New Query**, copy the following statement into the query pane, and then choose **Run Query**.
 
 ````sql
-SELECT * FROM TaxiData_csv limit 10
+SELECT * FROM taxi_csv limit 10
 ````
 
 Results for the above query look like the following:
@@ -99,7 +100,7 @@ Results for the above query look like the following:
 2.	Choose **New Query**, copy the following statement into the query pane, and then choose **Run Query** to get the total number of taxi rides for yellow cabs. 
 
 ````sql
-SELECT COUNT(1) as TotalCount FROM TaxiData_csv
+SELECT COUNT(1) as TotalCount FROM taxi_csv
 ````
 Results for the above query look like the following:
 ![athenacountquery-yelllowtaxi.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenacountquery-yelllowtaxi.png)
@@ -118,7 +119,7 @@ CASE vendorid
     ELSE vendorid END AS Vendor,
 COUNT(1) as RideCount, 
 avg(total_amount) as AverageAmount
-FROM TaxiData_csv
+FROM taxi_csv
 WHERE total_amount > 0
 GROUP BY (1)
 ````
@@ -135,12 +136,12 @@ By partitioning your data, you can restrict the amount of data scanned by each q
 
 1. Ensure that current AWS region is **US West (Oregon)** region
 
-2. Ensure `username` is selected from the DATABASE list and then choose **New Query**.
+2. Ensure `<username>` is selected from the DATABASE list and then choose **New Query**.
 
 3. In the query pane, copy the following statement to create a the NYTaxiRides table, and then choose **Run Query**:
 
 ````sql
-CREATE EXTERNAL TABLE TaxiData_parquet (
+CREATE EXTERNAL TABLE taxi_parquet (
     vendorid STRING,
     pickup_datetime TIMESTAMP,
     dropoff_datetime TIMESTAMP,
@@ -162,7 +163,7 @@ CREATE EXTERNAL TABLE TaxiData_parquet (
 
 >**Note:** Running the following sample query on the `TaxiData_parquet` table you just created will not return any result as no metadata about the partition is added to the Amazon Athena table catalog.  
 >```sql 
->SELECT * FROM TaxiData_parquet limit 10
+>SELECT * FROM taxi_parquet limit 10
 >``` 
 
 ### Adding partition metadata to Amazon Athena
@@ -172,7 +173,7 @@ Now that you have created the table you need to add the partition metadata to th
 1. Choose **New Query**, copy the following statement into the query pane, and then choose **Run Query** to add partition metadata.
 
 ```sql
-MSCK REPAIR TABLE TaxiData_parquet
+MSCK REPAIR TABLE taxi_parquet
 ```
 The returned result will contain information for the partitions that are added to NYTaxiRides for each taxi type (yellow, green, fhv) for every month for the year from 2009 to 2016
 
@@ -186,7 +187,7 @@ Now that you have added the partition metadata to the Athena data catalog you ca
 1. Choose **New Query**, copy the following statement into the query pane, and then choose **Run Query** to get the total number of taxi rides
 
 ```sql
-SELECT count(1) as TotalCount from TaxiData_parquet
+SELECT count(1) as TotalCount from taxi_parquet
 ```
 Results for the above query look like the following:
 
@@ -219,7 +220,7 @@ Results for the above query look like the following:
 2. Choose **New Query**, copy the following statement into the query pane, and then choose **Run Query** to get the total number of taxi rides by year
 
 ```sql
-SELECT YEAR, count(1) as TotalCount from TaxiData_parquet GROUP BY YEAR
+SELECT YEAR, count(1) as TotalCount from taxi_parquet GROUP BY YEAR
 ```
 
 Results for the above query look like the following:
@@ -229,7 +230,7 @@ Results for the above query look like the following:
 
 ```sql
 SELECT YEAR, MONTH, COUNT(1) as TotalCount 
-FROM TaxiData_parquet
+FROM taxi_parquet
 GROUP BY (1), (2) 
 ORDER BY (3) DESC LIMIT 12
 ```
@@ -241,7 +242,7 @@ Results for the above query look like the following:
 
 ```sql
 SELECT MONTH, TYPE, COUNT(1) as TotalCount 
-FROM TaxiData_parquet
+FROM taxi_parquet
 WHERE YEAR = 2016 
 GROUP BY (1), (2)
 ORDER BY (1), (2)
@@ -261,11 +262,12 @@ TYPE,
     avg(total_amount/trip_distance) as avgCostPerMile,
     avg(total_amount) as avgCost, 
     approx_percentile(total_amount, .99) percentile99
-FROM TaxiData_parquet
+FROM taxi_parquet
 WHERE YEAR = 2016 AND (TYPE = 'yellow' OR TYPE = 'green') AND trip_distance > 0 AND total_amount > 0
 GROUP BY MONTH, TYPE
 ORDER BY MONTH
 ```
+
 Results for the above query look like the following:
 
 ![athenapercentilequery-nytaxi.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenapercentilequery-nytaxi.png)
@@ -282,7 +284,6 @@ This lab has highlighted the following key points:
 | **Parquet** | SELECT count(*) as count FROM TaxiData_parquet | ~4.79 seconds  | 0KB$            | 2,870,781,820 |
 | **CSV**     | SELECT * FROM TaxiData_csv limit 1000          | ~1.013 seconds | ~479.7MB       | -               |
 | **Parquet** | SELECT * FROM TaxiData_parquet limit 1000      | ~1.1 seconds   | ~5.6MB         | -               |
-
 
 ---
 
