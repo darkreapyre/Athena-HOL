@@ -1,25 +1,22 @@
 # Lab 2: Visualization using Amazon QuickSight
 
-* [Create an Amazon S3 bucket](#create-an-amazon-s3-bucket)
+<!--* [Create an Amazon S3 bucket](#create-an-amazon-s3-bucket)
 * [Creating Amazon Athena Database and Table](#creating-amazon-athena-database-and-table)
     * [Create Athena Database](#create-database)
-    * [Create Athena Table](#create-a-table)
+    * [Create Athena Table](#create-a-table)-->
 * [Signing up for Amazon Quicksight Standard Edition](#signing-up-for-amazon-quicksight-standard-edition)
 * [Configuring Amazon QuickSight to use Amazon Athena as data source](#configuring-amazon-quicksight-to-use-amazon-athena-as-data-source)
 * [Visualizing the data using Amazon QuickSight](#visualizing-the-data-using-amazon-quicksight)
     * [Add year based filter to visualize the dataset for the year 2016](#add-year-based-filter-to-visualize-the-dataset-for-the-year-2016)
     * [Add the month based filter for the month of January](#add-the-month-based-filter-for-the-month-of-january)
     * [Visualize the data by hour of day for the month of January 2016](#visualize-the-data-by-hour-of-day-for-the-month-of-january-2016)
-    * [Visualize the data for the month of January 2016 for all taxi types(yellow, green, fhv)](#visualize-the-data-for-the-month-of-january-2016-for-all-taxi-typesyellow-green-fhv)
-
-    
+    * [Visualize the data for the month of January 2016 for all taxi types(yellow, green, fhv)](#visualize-the-data-for-the-month-of-january-2016-for-all-taxi-typesyellow-green-fhv)    
 
 ## Architectural Diagram
 ![architecture-overview-lab2.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/architecture-overview-lab2.png)
 
-
-## Create an Amazon S3 bucket
-> Note: If you have already have an S3 bucket in your AWS Account you can skip this section. 
+<!--## Create an Amazon S3 bucket
+> Note: If you have already have an S3 bucket in your AWS Account, created during Lab 2, you can skip this section. 
 
 1. Open the [AWS Management console for Amazon S3](https://s3.console.aws.amazon.com/s3/home?region=us-west-2)
 2. On the S3 Dashboard, Click on **Create Bucket**. 
@@ -103,7 +100,7 @@ Now that you have created the table you need to add the partition metadata to th
 ```sql
     MSCK REPAIR TABLE NYTaxiRides
 ```
-The returned result will contain information for the partitions that are added to NYTaxiRides for each taxi type (yellow, green, fhv) for every month for the year from 2009 to 2016
+The returned result will contain information for the partitions that are added to NYTaxiRides for each taxi type (yellow, green, fhv) for every month for the year from 2009 to 2016.-->
 
 ## Signing up for Amazon Quicksight Standard Edition
 
@@ -111,7 +108,7 @@ The returned result will contain information for the partitions that are added t
 
 ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage1.PNG)
 
-2. If this is the first time you are accessing QuickSight, you will see a sign-uplanding page for QuickSight. 
+2. If this is the first time you are accessing QuickSight, you will see a sign-up landing page for QuickSight. 
 3. Click on **Sign up for QuickSight**.
 
 > **Note:** Chrome browser might timeout at this step. If that's the case, try this step in Firefox/Microsoft Edge/Safari.
@@ -177,7 +174,7 @@ The returned result will contain information for the partitions that are added t
 
 5. Enter the **Data source** **name** (e.g. *AthenaDataSource*).
 6. Click **Create data source**.
-7. Select the **mydatabase** database.
+7. Select the `<username>` database.
 
 ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage12.PNG)
 
