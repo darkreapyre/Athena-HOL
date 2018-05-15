@@ -248,12 +248,12 @@ In regions where AWS Glue is supported, Athena uses the AWS Glue Data Catalog as
 
     > Ensure you are in the **US West (Oregon)** region. 
 
-16. Under Database, you should see the database **nycitytaxianalysis-reinv17-parquet** which was just created. Select this database and you should see under Tables **taxi_yellow**.
+16. Under Database, select the `<username>` database and you should see under Tables, `<username>_new_yellow`. If not **Manually refresh the table list** by clicking the **Refresh** icon.
 
 17. In the query editor on the right, type
 
     ```
-    select count(*) from taxi_yellow;
+    select count(*) from <username>_new_yellow;
     ```
 
     and take note the Run Time and Data scanned numbers here. 
@@ -262,9 +262,7 @@ In regions where AWS Glue is supported, Athena uses the AWS Glue Data Catalog as
 
     What we see is the Run time and Data scanned numbers for Amazon Athena to **query and scan the parquet data**.
 
-18. Under Database, you should see the `<username>`, which was created in Lab 1. Select this database and you should see under Tables `<username>_yellow`. 
-
-19. In the query editor on the right, type
+18. Now we compare the performance to the original table created in Lab 1. In the query editor on the right, type
 
     ```
     select count(*) from <username>_yellow;
@@ -274,9 +272,7 @@ In regions where AWS Glue is supported, Athena uses the AWS Glue Data Catalog as
 
     ![glue20](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_uncomp_scanresult.PNG)
 
-20. What we see is the Run time and Data scanned numbers for Amazon Athena to query and scan the uncompressed data from the previous section.
-
-> Note: Athena charges you by the amount of data scanned per query. You can save on costs and get better performance if you partition the data, compress data, or convert it to columnar formats such as Apache Parquet.
+19. What we see is the Run time and Data scanned numbers for Amazon Athena to query and scan the **uncompressed**  data.
 
 ## Deleting the Glue database, crawlers and ETL Jobs created for this Lab
 
@@ -296,7 +292,8 @@ Now that you have successfully discovered and analyzed the dataset using Amazon 
 
 In the lab, you went from data discovery to analyzing a canonical dataset, without starting and setting up a single server. You started by crawling a dataset you didn’t know anything about and the crawler told you the structure, columns, and counts of records.
 
-From there, you saw the datasets were in different formats, but represented the same thing: NY City Taxi rides. You then converted them into a canonical (or normalized) form that is easily queried through Athena and possible in QuickSight, in addition to a wide number of different tools not covered in this lab, such as EMR and RedShift.
+From there, you saw the datasets were in different formats, but represented the same thing: NY City Taxi rides. You then converted them into a canonical (or normalized) form that is easily queried through Athena and possible in QuickSight. Additionally, you can see that since Athena charges you by the amount of data scanned per query, you can save on costs and get better performance if you partition the data, compress data, or convert it to columnar formats such as Apache Parquet.
+
 
 ---
 
