@@ -274,22 +274,22 @@ Now that you have configured the data source and created a new filed to represen
 
 ### Visualize the data by hour of day for the month of January 2016
 
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage19.PNG)
-
 1. Select **Visualize** from the navigation menu in the left-hand corner.
 2. Under the **Fields list**, deselect **month** by clicking on **month** field name.
 3. Select **hourofday** by clicking on the **hourofday** field name from the **Fields list**.
 4. Change the visual type to a line chart by selecting the line chart icon highlighted in the screenshot below under **Visual types**.
 5. Using the slider on x-axis, select the entire range [0,23] for **hourofday** field.
 
-### Visualize the data for the month of January 2016 for all taxi types(yellow, green, fhv)
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage19.PNG)
 
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage20.PNG)
+### Visualize the data for the month of January 2016 for all taxi types(yellow, green, fhv)
 
 1. Click on the double drop-down arrow underneath your username at the top-right corner of the page to reveal **X-axis**, **Value** and **Color** under **Field wells**.
 2. Under the **Fields list**, deselect **hourofday** by clicking on **hourofday** field name.
 3. Select **pickup_datetime** for x-axis by clicking on the **pickup_datetime** field name from **Fields list**.
 4. Select **type** for Color by clicking on the **type** field name from **Fields list.**
+
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage20.PNG)
 
 5. Click on the field name **pickup_datetime** in x-axis to reveal a sub-menu.
 6. Select **Aggregate:Day** to aggregate by day.
