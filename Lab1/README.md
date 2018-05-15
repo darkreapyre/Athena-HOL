@@ -281,7 +281,7 @@ This lab has highlighted the following key points:
 |             |                    **Query**                   |   **Run Time**   | **Data Scanned** |   **Results**   |
 |-------------|:----------------------------------------------:|:----------------:|:----------------:|:---------------:|
 | **CSV**     | SELECT count(*) as count FROM TaxiData_csv     | ~21.74 seconds | ~207.54GB       | 1,310,911,060 |
-| **Parquet** | SELECT count(*) as count FROM TaxiData_parquet | ~4.79 seconds  | 0KB$            | 2,870,781,820 |
+| **Parquet** | SELECT count(*) as count FROM TaxiData_parquet | ~4.79 seconds  | 0KB            | 2,870,781,820 |
 | **CSV**     | SELECT * FROM TaxiData_csv limit 1000          | ~1.013 seconds | ~479.7MB       | -               |
 | **Parquet** | SELECT * FROM TaxiData_parquet limit 1000      | ~1.1 seconds   | ~5.6MB         | -               |
 

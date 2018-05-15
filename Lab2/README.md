@@ -294,6 +294,11 @@ In the lab, you went from data discovery to analyzing a canonical dataset, witho
 
 From there, you saw the datasets were in different formats, but represented the same thing: NY City Taxi rides. You then converted them into a canonical (or normalized) form that is easily queried through Athena and possible in QuickSight. Additionally, you can see that since Athena charges you by the amount of data scanned per query, you can save on costs and get better performance if you partition the data, compress data, or convert it to columnar formats such as Apache Parquet. The following table highlights this with the approximate results you should have seen from steps **18** and **19** above.
 
+|             |                    **Query**                   |   **Run Time**   | **Data Scanned** |   **Results**   |
+|-------------|:----------------------------------------------:|:----------------:|:----------------:|:---------------:|
+| **`<username>_new_yellow`**     | select count(*) from `<username>_new_yellow`     | ~1.1 seconds | 0KB       | 10906858 |
+| **`<username>_new`** | select count(*) from `<username>_yellow` | ~21.98 seconds  | ~1.59GB            | 10906858 |
+
 ---
 
 ## License

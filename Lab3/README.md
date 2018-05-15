@@ -3,8 +3,8 @@
 <!--* [Create an Amazon S3 bucket](#create-an-amazon-s3-bucket)
 * [Creating Amazon Athena Database and Table](#creating-amazon-athena-database-and-table)
     * [Create Athena Database](#create-database)
-    * [Create Athena Table](#create-a-table)-->
-* [Signing up for Amazon Quicksight Standard Edition](#signing-up-for-amazon-quicksight-standard-edition)
+    * [Create Athena Table](#create-a-table)
+* [Signing up for Amazon QuickSight Standard Edition](#signing-up-for-amazon-quicksight-standard-edition)-->
 * [Configuring Amazon QuickSight to use Amazon Athena as data source](#configuring-amazon-quicksight-to-use-amazon-athena-as-data-source)
 * [Visualizing the data using Amazon QuickSight](#visualizing-the-data-using-amazon-quicksight)
     * [Add year based filter to visualize the dataset for the year 2016](#add-year-based-filter-to-visualize-the-dataset-for-the-year-2016)
@@ -100,7 +100,7 @@ Now that you have created the table you need to add the partition metadata to th
 ```sql
     MSCK REPAIR TABLE NYTaxiRides
 ```
-The returned result will contain information for the partitions that are added to NYTaxiRides for each taxi type (yellow, green, fhv) for every month for the year from 2009 to 2016.-->
+The returned result will contain information for the partitions that are added to NYTaxiRides for each taxi type (yellow, green, fhv) for every month for the year from 2009 to 2016.
 
 ## Signing up for Amazon Quicksight Standard Edition
 
@@ -123,7 +123,7 @@ The returned result will contain information for the partitions that are added t
 
    i. Enter a unique **QuickSight account name.**
 
-   ii. Enter avalid email for **Notification email address**.
+   ii. Enter a valid email for **Notification email address**.
 
    iii. Just for this step, leave the **QuickSight capacity region **as **N.Virginia**. 
 
@@ -151,7 +151,7 @@ The returned result will contain information for the partitions that are added t
 ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage7.PNG)
 
 12. Check the box for **Amazon S3 Storage Analytics**[Optional].
-13. Click **Apply**.
+13. Click **Apply**.-->
 
 ## Configuring Amazon QuickSight to use Amazon Athena as data source
 
@@ -178,12 +178,10 @@ The returned result will contain information for the partitions that are added t
 
 ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage12.PNG)
 
-8. Choose the **nytaxirides** table.
+8. Choose the **taxi_parquet** table.
 9. Choose **Edit/Preview** data.
 
 > This is a crucial step. Please ensure you choose **Edit/Preview** data.
-
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage13.PNG)
 
 10. Under **Fields** on the left column, choose **New field**
 
@@ -197,7 +195,7 @@ The returned result will contain information for the partitions that are added t
 
     v. Choose **Create** to add a field which is calculated from an existing field. In this case, the **hourofday** field is calculated from the **pickup_datetime filed** based on the specified formula.
 
-
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage13.PNG)
 
 11. Choose **Save and Visualize** on top of the page.
 
@@ -293,7 +291,7 @@ Now that you have configured the data source and created a new filed to represen
 
 1. Click on the double drop-down arrow underneath your username at the top-right corner of the page to reveal **X-axis**, **Value** and **Color** under **Field wells**.
 2. Under the **Fields list**, deselect **hourofday** by clicking on **hourofday** field name.
-3. Select **pickup_datetime** for x-axis by clicking on the **pickup_datetime **field name from **Fields list**.
+3. Select **pickup_datetime** for x-axis by clicking on the **pickup_datetime** field name from **Fields list**.
 4. Select **type** for Color by clicking on the **type** field name from **Fields list.**
 
 5. Click on the field name **pickup_datetime** in x-axis to reveal a sub-menu.
@@ -302,11 +300,10 @@ Now that you have configured the data source and created a new filed to represen
 ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage21.PNG)
 8. Using the slider on x-axis, select the entire month of January 2016 for **pickup_datetime** field.
 
-
 > Note: The interesting outlier in the above graph is that on Jan23rd, 2016, you see the dip in the number of taxis across all types. Doing a quick google search for that date, gets us this weather article from NBC New York
 > ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage22.PNG)
 
-*Using Amazon Qu.ickSight, you were able to see patterns across a time-series data by building visualizations, performing ad-hoc analysis, and quickly generating insights.*
+*Using Amazon QuickSight, you were able to see patterns across a time-series data by building visualizations, performing ad-hoc analysis, and quickly generating insights.*
 
 ---
 ## License
