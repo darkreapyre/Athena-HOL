@@ -274,7 +274,7 @@ In regions where AWS Glue is supported, Athena uses the AWS Glue Data Catalog as
 
 19. What we see is the Run time and Data scanned numbers for Amazon Athena to query and scan the **uncompressed**  data.
 
-## Deleting the Glue database, crawlers and ETL Jobs created for this Lab
+<!--## Deleting the Glue database, crawlers and ETL Jobs created for this Lab
 
 Now that you have successfully discovered and analyzed the dataset using Amazon Glue and Amazon Athena, you need to delete the resources created as part of this lab. 
 
@@ -286,14 +286,13 @@ Now that you have successfully discovered and analyzed the dataset using Amazon 
 6. Click on **Jobs** under ETL column on the left. 
 7. Check the box for the jobs that were created as part of this lab. Click on **Action** and select **Delete**. And click on **Delete**. 
 8. Open the [AWS Management console for Amazon S3](https://s3.console.aws.amazon.com/s3/home).
-9. Click on the S3 bucket that was created as part of this lab. You need to click on its corresponding **Bucket icon** to select the bucket instead of opening the bucket. Click on **Delete bucket** button on the top, to delete the S3 bucket. In the pop-up window, Type the name of the bucket (that was created as part of this lab), and click **Confirm**. 
+9. Click on the S3 bucket that was created as part of this lab. You need to click on its corresponding **Bucket icon** to select the bucket instead of opening the bucket. Click on **Delete bucket** button on the top, to delete the S3 bucket. In the pop-up window, Type the name of the bucket (that was created as part of this lab), and click **Confirm**. -->
 
 ## Summary
 
 In the lab, you went from data discovery to analyzing a canonical dataset, without starting and setting up a single server. You started by crawling a dataset you didn’t know anything about and the crawler told you the structure, columns, and counts of records.
 
-From there, you saw the datasets were in different formats, but represented the same thing: NY City Taxi rides. You then converted them into a canonical (or normalized) form that is easily queried through Athena and possible in QuickSight. Additionally, you can see that since Athena charges you by the amount of data scanned per query, you can save on costs and get better performance if you partition the data, compress data, or convert it to columnar formats such as Apache Parquet.
-
+From there, you saw the datasets were in different formats, but represented the same thing: NY City Taxi rides. You then converted them into a canonical (or normalized) form that is easily queried through Athena and possible in QuickSight. Additionally, you can see that since Athena charges you by the amount of data scanned per query, you can save on costs and get better performance if you partition the data, compress data, or convert it to columnar formats such as Apache Parquet. The following table highlights this with the approximate results you should have seen from steps **18** and **19** above.
 
 ---
 
