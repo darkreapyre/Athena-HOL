@@ -172,7 +172,7 @@ The returned result will contain information for the partitions that are added t
 
 ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage11.PNG)
 
-5. Enter the **Data source** **name** (e.g. *AthenaDataSource*).
+5. Enter the **Data source** **name** (e.g. *user1Athena*).
 6. Click **Create data source**.
 7. Select the `<username>` database.
 
