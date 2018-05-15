@@ -205,9 +205,6 @@ Now that you have configured the data source and created a new filed to represen
 
 ### Add year based filter to visualize the dataset for the year 2016
 
-
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage14.PNG)
-
 1. Ensure that current AWS region is **US West (Oregon)** region.
 
 2. Under the **Fields List**, select the **year** field to show the distribution of fares per year.
@@ -220,15 +217,13 @@ Now that you have configured the data source and created a new filed to represen
 
    iii. Select **1235**.
 
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage15.PNG)
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage14.PNG)
 
 4. To add a filter on the **year** filed, 
 
    i. Select the dropdown for **year** field from the **Fields list**.
 
    ii. Select **Add filter to the field** from the dropdown menu.
-
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage16.PNG)
 
 5. To filter the data only for the year 2016
 
@@ -244,14 +239,16 @@ Now that you have configured the data source and created a new filed to represen
   
    vi. Click **Close**.
 
-### Add the month based filter for the month of January
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage16.PNG)
 
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage17.PNG)
+### Add the month based filter for the month of January
 
 1. Ensure that current AWS region is **US West(Oregon)** region.
 2. Select **Visualize** from the navigation menu in the left-hand corner.
 3. Under the **Fields list**, deselect **year** by clicking on **year** field name.
 4. Select **month** by clicking on the **month** field name from the **Fields list**.
+
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage17.PNG)
 
 5. To filter the data set for the month of January (Month 1)
 
@@ -265,7 +262,7 @@ Now that you have configured the data source and created a new filed to represen
 
    i. Choose the new filter that you just created by clicking on **#** next to filter name **month** under the **Edit Filter** menu.
  
-   ii. Select **Filter list** for the two dropdowns under the filter name.
+   ii. Select **Filter list** for the two dropdown lists, under the filter name.
  
    iii. Deselect **ALL**.
  
