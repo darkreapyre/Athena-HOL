@@ -293,10 +293,9 @@ Now that you have configured the data source and created a new filed to represen
 
 5. Click on the field name **pickup_datetime** in x-axis to reveal a sub-menu.
 6. Select **Aggregate:Day** to aggregate by day.
+7. Using the slider on x-axis, select the entire month of January 2016 for **pickup_datetime** field.
 
 ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage21.PNG)
-
-8. Using the slider on x-axis, select the entire month of January 2016 for **pickup_datetime** field.
 
 > Note: The interesting outlier in the above graph is that on Jan23rd, 2016, you see the dip in the number of taxis across all types. Doing a quick google search for that date, gets us this weather article from NBC New York
 >
