@@ -10,7 +10,8 @@
     * [Add year based filter to visualize the dataset for the year 2016](#add-year-based-filter-to-visualize-the-dataset-for-the-year-2016)
     * [Add the month based filter for the month of January](#add-the-month-based-filter-for-the-month-of-january)
     * [Visualize the data by hour of day for the month of January 2016](#visualize-the-data-by-hour-of-day-for-the-month-of-january-2016)
-    * [Visualize the data for the month of January 2016 for all taxi types(yellow, green, fhv)](#visualize-the-data-for-the-month-of-january-2016-for-all-taxi-typesyellow-green-fhv)    
+    * [Visualize the data for the month of January 2016 for all taxi types(yellow, green, fhv)](#visualize-the-data-for-the-month-of-january-2016-for-all-taxi-typesyellow-green-fhv)
+* [Summary](#summary)
 
 ## Architectural Diagram
 ![architecture-overview-lab2.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/architecture-overview-lab2.png)
@@ -155,15 +156,13 @@ The returned result will contain information for the partitions that are added t
 
 ## Configuring Amazon QuickSight to use Amazon Athena as data source
 
-> For this lab, you will need to choose the **US West (Oregon)** region. 
-
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage8.PNG)
+>**Note:** For this lab, you will need to choose the **US West (Oregon)** region. 
 
 1. Click on the region icon on the top-right corner of the page, and select **US West (Oregon)**. 
+2. Click on **Manage data** on the top-right corner of the webpage to review existing data sets. 
 
 ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage9.PNG)
 
-2. Click on **Manage data** on the top-right corner of the webpage to review existing data sets.
 3. Click on **New data set** on the top-left corner of the webpage and review the options. 
 
 ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage10.PNG)
@@ -178,20 +177,20 @@ The returned result will contain information for the partitions that are added t
 
 ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage12.PNG)
 
-8. Choose the **taxi_parquet** table.
+8. Choose the `taxi_parquet` table.
 9. Choose **Edit/Preview** data.
 
-> This is a crucial step. Please ensure you choose **Edit/Preview** data.
+>**Note:** This is a crucial step. Please ensure you choose **Edit/Preview** data.
 
-10. Under **Fields** on the left column, choose **New field**
+10. As an example of augmenting the existing data, we can add a new field, derived from existing data. Under **Fields** on the left column, choose **New field**
 
     i. Select the **extract** operation from Function list.
 
-    ii. Select **pickup_datetime** from the **Field list**.
+    ii. Select `pickup_datetime` from the **Field list**.
 
-    iii. For **Calculated field name**, type **hourofday**.
+    iii. For **Calculated field name**, type `hourofday`.
 
-    iv. Type ‘HH’ so the Formula is **extract('HH',{pickup_datetime})**
+    iv. Type ‘HH’ so the Formula is `extract('HH',{pickup_datetime})`
 
     v. Choose **Create** to add a field which is calculated from an existing field. In this case, the **hourofday** field is calculated from the **pickup_datetime filed** based on the specified formula.
 
@@ -211,7 +210,7 @@ Now that you have configured the data source and created a new filed to represen
 
 3. To reformat the **year** without comma
 
-   i. Select the dropdown arrow for the **year **field.
+   i. Select the dropdown arrow for the **year** field.
 
    ii. Select **Format 1,234.5678** from the dropdown menu.
 
@@ -219,7 +218,7 @@ Now that you have configured the data source and created a new filed to represen
 
 ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage14.PNG)
 
-4. To add a filter on the **year** filed, 
+4. To add a filter on the **year** filed: 
 
    i. Select the dropdown for **year** field from the **Fields list**.
 
@@ -300,6 +299,8 @@ Now that you have configured the data source and created a new filed to represen
 > Note: The interesting outlier in the above graph is that on Jan23rd, 2016, you see the dip in the number of taxis across all types. Doing a quick google search for that date, gets us this weather article from NBC New York
 >
 > ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage22.PNG)
+
+## Summary
 
 *Using Amazon QuickSight, you were able to see patterns across a time-series data by building visualizations, performing ad-hoc analysis, and quickly generating insights.*
 
