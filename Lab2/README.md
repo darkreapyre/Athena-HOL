@@ -1,306 +1,352 @@
-# Lab 3: ETL and Data Discovery using Amazon Glue
+# Lab 2: Visualization using Amazon QuickSight
 
-* [Create an IAM Role](#create-an-iam-role)
-* [Create an Amazon S3 bucket](#create-an-amazon-s3-bucket)
-* [Discover the Data](#discover-the-data)
-* [Optimize the Queries and convert into Parquet](#optimize-the-queries-and-convert-into-parquet)
-* [Query the Partitioned Data using Amazon Athena](#query-the-partitioned-data-using-amazon-athena)
-* [Deleting the Glue database, crawlers and ETL Jobs created for this Lab](#deleting-the-glue-database-crawlers-and-etl-jobs-created-for-this-lab)
-* [Summary](#summary)
+<!--* [Create an Amazon S3 bucket](#create-an-amazon-s3-bucket)
+* [Creating Amazon Athena Database and Table](#creating-amazon-athena-database-and-table)
+    * [Create Athena Database](#create-database)
+    * [Create Athena Table](#create-a-table)
+* [Signing up for Amazon QuickSight Standard Edition](#signing-up-for-amazon-quicksight-standard-edition)-->
+* [Configuring Amazon QuickSight to use Amazon Athena as data source](#configuring-amazon-quicksight-to-use-amazon-athena-as-data-source)
+* [Visualizing the data using Amazon QuickSight](#visualizing-the-data-using-amazon-quicksight)
+    * [Add year based filter to visualize the dataset for the year 2016](#add-year-based-filter-to-visualize-the-dataset-for-the-year-2016)
+    * [Add the month based filter for the month of January](#add-the-month-based-filter-for-the-month-of-january)
+    * [Visualize the data by hour of day for the month of January 2016](#visualize-the-data-by-hour-of-day-for-the-month-of-january-2016)
+    * [Visualize the data for the month of January 2016 for all taxi types(yellow, green, fhv)](#visualize-the-data-for-the-month-of-january-2016-for-all-taxi-typesyellow-green-fhv)    
 
 ## Architectural Diagram
+![architecture-overview-lab2.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/architecture-overview-lab2.png)
 
-![architecture-overview-lab3.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/Screen+Shot+2017-11-17+at+1.11.32+AM.png)
-
-## Create an IAM Role
-
-Create an IAM role that has permission to your Amazon S3 sources, targets, temporary directory, scripts, **AWSGlueServiceRole** and any libraries used by the job. You can click [here](https://console.aws.amazon.com/iam/home?region=us-west-2#/roles) to create a new role. For additional documentation to create a role [here](docs.aws.amazon.com/cli/latest/reference/iam/create-role.html).
-
-1. On the IAM Page, click on **Create Role**.
-2. Choose the service as **Glue** and click on **Next: Permissions** on the bottom.
-3. On the Attach permissions policies, search policies for S3 and check the box for **AmazonS3FullAccess**. 
-
-> Do not click on the policy, you just have to check the corresponding checkbox. 
-
-4. On the same page, now search policies for Glue and check the box for **AWSGlueServiceRole** and **AWSGlueConsoleFullAccess**.
-
-> Do not click on the policy, you just have to check the corresponding checkbox. 
-
-5. Click on **Next: Review**.
-6. Enter Role name as: 
-
-```
-<username>-glue-etl-role
-```
-
-​7. Click **Create role**.
-
-## Create an Amazon S3 bucket
+<!--## Create an Amazon S3 bucket
+> Note: If you have already have an S3 bucket in your AWS Account, created during Lab 2, you can skip this section. 
 
 1. Open the [AWS Management console for Amazon S3](https://s3.console.aws.amazon.com/s3/home?region=us-west-2)
 2. On the S3 Dashboard, Click on **Create Bucket**. 
 
 ![createbucket.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/createbucket.png)
 
-1. In the **Create Bucket** pop-up page, input a unique **Bucket name**. So it’s advised to choose a large bucket name, with many random characters and numbers (no spaces). It will be easier to name your bucket
+3. In the **Create Bucket** pop-up page, input a unique **Bucket name**. So it’s advised to choose a large bucket name, with many random characters and numbers (no spaces). 
 
-   ```
-   <username>-glue-scripts-us-west-2
-   ```
-
-   and it would be easier to choose/select this bucket for the remainder of this Lab. 
-
-   i.Select the region as **Oregon**.  
-   ii. Click **Next** to navigate to next tab.  
-   iii. In the **Set properties** tab, leave all options as default.  
-   iv. In the **Set permissions** tag, leave all options as default.  
-   v. In the **Review** tab, click on **Create Bucket**.  
+    1. Select the region as **Oregon**. 
+    2. Click **Next** to navigate to next tab. 
+    3. In the **Set properties** tab, leave all options as default. 
+    4. In the **Set permissions** tag, leave all options as default.
+    5. In the **Review** tab, click on **Create Bucket**
 
 ![createbucketpopup.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/createbucketpopup.png)
 
-2. Now, in this newly created bucket, create two folders **tmp** and **yellow**. We will use these buckets as part of the Lab later on. 
+## Creating Amazon Athena Database and Table
 
-## Discover the Data
+> Note: If you have complete the [Lab 1: Serverless Analysis of data in Amazon S3 using Amazon Athena](../Lab1) you can skip this section and go to the next section [Signing up for Amazon Quicksight Standard Edition](#signing-up-for-amazon-quicksight-standard-edition)
 
-During this lab, we will focus on one month of the New York City Taxi Records dataset, however you could easily do this for the entire eight years of data. As you crawl this unknown dataset, you discover that the data is in different formats, depending on the type of taxi. You then convert the data to a canonical form, start to analyze it, and build a set of visualizations. All without launching a single server.
+Amazon Athena uses Apache Hive to define tables and create databases. Databases are a logical grouping of tables. When you create a database and table in Athena, you are simply describing the schema and location of the table data in Amazon S3\. In case of Hive, databases and tables don’t store the data along with the schema definition unlike traditional relational database systems. The data is read from Amazon S3 only when you query the table. The other benefit of using Hive is that the metastore found in Hive can be used in many other big data applications such as Spark, Hadoop, and Presto. With Athena catalog, you can now have Hive-compatible metastore in the cloud without the need for provisioning a Hadoop cluster or RDS instance. For guidance on databases and tables creation refer [Apache Hive documentation](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL). The following steps provides guidance specifically for Amazon Athena.
 
->**Note:** For this lab, you will need to choose the **US West (Oregon)** region. 
+![createbucket.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/createbucket.png)
 
-1. Open the [AWS Management console for Amazon Glue](https://us-west-2.console.aws.amazon.com/glue/home?region=us-west-2#). 
+3. In the **Create Bucket** pop-up page, input a unique **Bucket name**. So it’s advised to choose a large bucket name, with many random characters and numbers (no spaces). 
+i.Select the region as **Oregon**. 
+ii. Click **Next** to navigate to next tab. 
+iii. In the **Set properties** tab, leave all options as default. 
+iv. In the **Set permissions** tag, leave all options as default.
+v. In the **Review** tab, click on **Create Bucket**
 
-2. To analyze all the taxi rides for January 2016, you start with a set of data in S3. We will use the database that was created during Lab 1. Remember, a database is a set of associated table definitions, organized into a logical group. In Athena, database names are all lowercase, no matter what you type. For more information on Database nameing conventions, see the [Athena Documentation](https://docs.aws.amazon.com/athena/latest/ug/tables-databases-columns-names.html).
-<!--
->**Note:** If you haven't already created a database in Lab 1, please follow the three steps below to create the database using AWS Glue.
+![createbucketpopup.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/createbucketpopup.png)
 
-   i. Click on **Databases** under Data Catalog column on the left. 
+### Create Database
 
-   ![glue1](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_1.PNG)
+1. Open the [AWS Management Console for Athena](https://console.aws.amazon.com/athena/home).
+2. If this is your first time visiting the AWS Management Console for Athena, you will get a Getting Started page. Choose **Get Started** to open the Query Editor. If this isn't your first time, the Athena **Query Editor** opens.
+3. Make a note of the AWS region name, for example, for this lab you will need to choose the **US West (Oregon)** region.
+4. In the Athena **Query Editor**, you will see a query pane with an example query. Now you can start entering your query in the query pane.
+5. To create a database named *mydatabase*, copy the following statement, and then choose **Run Query**:
 
-   ii. Click on the **Add Database** button. 
+````sql
+    CREATE DATABASE mydatabase
+````
 
-   iii. Enter the Database name as `<username>`. You can skip the description and location fields and click on **Create**. 
--->
-3. Click on **Crawlers** under Data Catalog column on the left. 
+6.	Ensure *mydatabase* appears in the DATABASE list on the **Catalog** dashboard
 
-   ![glue2](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_2.PNG)
+![athenacatalog.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenacatalog.png)
 
-   i. Click on **Add Crawler** button. 
+### Create a Table
 
-   ii. Under Add information about your crawler, for Crawler name type `<username>-crawler`. You can skip the Description and Classifiers field and click on **Next**. 
+1. Ensure that current AWS region is **US West (Oregon)** region
 
-   iii. Under Data Store, choose S3 and ensure the radio button for **Specified path in another account** is checked. 
+2. Ensure **mydatabase** is selected from the DATABASE list and then choose **New Query**.
 
-   iv. For Include path, enter the following S3 path and click on **Next**.
+3. In the query pane, copy the following statement to create a the NYTaxiRides table, and then choose **Run Query**:
 
-   ```
-   s3://serverless-analytics/glue-blog
-   ```
+````sql
+  CREATE EXTERNAL TABLE NYTaxiRides (
+    vendorid STRING,
+    pickup_datetime TIMESTAMP,
+    dropoff_datetime TIMESTAMP,
+    ratecode INT,
+    passenger_count INT,
+    trip_distance DOUBLE,
+    fare_amount DOUBLE,
+    total_amount DOUBLE,
+    payment_type INT
+    )
+  PARTITIONED BY (YEAR INT, MONTH INT, TYPE string)
+  STORED AS PARQUET
+  LOCATION 's3://us-west-2.serverless-analytics/canonical/NY-Pub'
+````
 
-   v. For Add Another data store, choose **No** and click on **Next**.
+4.Ensure the table you just created appears on the Catalog dashboard for the selected database.
 
-   vi. For Choose an IAM Role, select **Create an IAM role** and enter the role name as following and click on **Next**.
+Now that you have created the table you need to add the partition metadata to the Amazon Athena Catalog.
 
-   ```
-   <username>-crawler-role
-   ```
-   >__Note:__ The IAM Role Name should resemble `AWSGlueServiceRole-<username>-crawler-role`.
+1. Choose **New Query**, copy the following statement into the query pane, and then choose **Run Query** to add partition metadata.
 
-   vii. For Create a schedule for this crawler, choose Frequency as **Run on Demand** and click on **Next**.
+```sql
+    MSCK REPAIR TABLE NYTaxiRides
+```
+The returned result will contain information for the partitions that are added to NYTaxiRides for each taxi type (yellow, green, fhv) for every month for the year from 2009 to 2016.
 
-   viii. Configure the crawler output database and prefix:
+## Signing up for Amazon Quicksight Standard Edition
 
-   ​	a. For **Database**, select the database created during Lab 1, `<username>`.
+1. Open the [AWS ManagementConsole for QuickSight](https://us-east-1.quicksight.aws.amazon.com/sn/start).
 
-   ​	b. For **Prefix added to tables (optional)**, type `<username>_` and click on **Next**.
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage1.PNG)
 
-   ​	c. Review configuration and click on **Finish** and on the next page, click on **Run it now** in the green box on the top. 
+2. If this is the first time you are accessing QuickSight, you will see a sign-up landing page for QuickSight. 
+3. Click on **Sign up for QuickSight**.
 
-   ![glue14](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_14.PNG)
-   
-   >__Note:__ The crawler should take approximately 30 seconds to run, wait until the ***"Crawler `<username>-crawler` completed and made the following changes: 3 tables created, 0 tables updated. See the tables created in database `<username>`."** message has appeared before proceeding to the next step.
+> **Note:** Chrome browser might timeout at this step. If that's the case, try this step in Firefox/Microsoft Edge/Safari.
 
-   ​	d. The crawler runs and indicates that it found three tables.
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage2.PNG)
 
-4. Click on **Tables**, under Data Catalog on the left column. 
+4. On the next page, for the subscription type select the **"Standard Edition"** and click **Continue**. 
 
-5. If you look under **Tables**, you can see the three new tables that were created under the database `<username>`.
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage3.PNG)
 
-   ![glue4](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_4.PNG)
+5. On the next page,
 
-6. The crawler used the built-in classifiers and identified the tables as CSV, inferred the columns/data types, and collected a set of properties for each table. If you look in each of those table definitions, you see the number of rows for each dataset found and that the columns don’t match between tables. As an example, clicking on the `<username>_yellow` table, you can see the yellow dataset for January 2017 with 8.7 million rows, the location on S3, and the various columns found.
+   i. Enter a unique **QuickSight account name.**
 
-   ![glue5](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_5.PNG)
+   ii. Enter a valid email for **Notification email address**.
 
-## Optimize the Queries and convert into Parquet 
+   iii. Just for this step, leave the **QuickSight capacity region **as **N.Virginia**. 
 
-Create an ETL job to move this data into a query-optimized form. You convert the data into a column format, changing the storage type to Parquet, and writing the data to a bucket that you own.
+   iv. Ensure that **Enable autodiscovery of your data and users in your Amazon Redshift, Amazon RDS and AWS IAM Services** and **Amazon Athena** boxes are checked. 
 
-1. Open the [AWS Management console for Amazon Glue](https://us-west-2.console.aws.amazon.com/glue/home?region=us-west-2#). 
+   v. **Click Finish**. 
 
-2. Click on **Jobs** under ETL on the left column and then click on the **Add Job** button. 
+   vi. You will be presented with a with message **Congratulations**! **You are signed up for Amazon QuickSight! **on successful sign up. Click on **Go to Amazon QuickSight**. 
 
-3. Under Job properties, input name as `<username>-yellow-etl`. Since we will be working with only the **yellow** dataset for this workshop.
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage4.PNG)
 
-   i. Under IAM Role, Choose the IAM role created at the beginning of this lab, e.g. `<username>-glue-etl-role`
+6. On the Amazon QuickSight dashboard, navigate to User Settings page on the Top-Right section and click **Manage QuickSight**.
 
-   x. Under This job runs, choose the radio button for **A proposed script generated by AWS Glue**.
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage5.PNG)
 
-   xi. For **ETL language**, choose the radio button for **Python**.
+7. In this section, click on **Account Settings**.
+8. Under Account Settings, in **Account Permissions** Click **Edit AWS Permissions**.
 
-   xii. For **Script file name**, enter `<username>-yellow-etl`.
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage6.PNG)
 
-   > For this Lab, we are only working on the **yellow** dataset. Feel free to run through these steps to also convert the **green** and **FHV** dataset. 
+9. Check the box for **Amazon S3** and you will see a pop-up to select Amazon S3 buckets.
+10. Ensure **Select All **is checked.
+11. Click on **Select buckets**.
 
-   xiii. For S3 path where script is stored, click on the Folder icon and choose the S3 bucket created at the beginning of this Lab. **Choose the newly created S3 bucket via the Folder icon**. 
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage7.PNG)
 
-   xiiiv. For Temporary directory, choose the `tmp` folder created at the beginning of this Lab. **Choose the S3 bucket via the Folder icon** and click **Next**. 
+12. Check the box for **Amazon S3 Storage Analytics**[Optional].
+13. Click **Apply**.-->
 
-   > **Note:** Ensure the temporary bucket is already created/available in your S3 bucket. 
+## Configuring Amazon QuickSight to use Amazon Athena as data source
 
-   ![glue15](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_15.PNG)
-<!--
-   xv. Click on Advanced properties, and ensure that **Enable** for Job bookmark.
+> For this lab, you will need to choose the **US West (Oregon)** region. 
 
-   xvi. Here's a screenshot of a finished job properties window:
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage8.PNG)
 
-   ![glue16](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_16.PNG)
--->
+1. Click on the region icon on the top-right corner of the page, and select **US West (Oregon)**. 
 
-4. Click **Next**.
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage9.PNG)
 
-5. Under Choose your data sources, select `<username>_yellow` table as the data source and click on **Next**.
+2. Click on **Manage data** on the top-right corner of the webpage to review existing data sets.
+3. Click on **New data set** on the top-left corner of the webpage and review the options. 
 
-6. Under Choose your data targets, select the radio button for **Create tables in your data target**.
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage10.PNG)
 
-   i. For Data store, Choose **Amazon S3**.
+4. Select **Athena** as a Data source.
 
-   ii. For Format, choose **Parquet**.
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage11.PNG)
 
-   iii. For Target path, **click on the folder icon** and choose the `yellow` folder previously created. **This S3 Bucket/Folder will contain the transformed Parquet data**.
+5. Enter the **Data source** **name** (e.g. *user1Athena*).
+6. Click **Create data source**.
+7. Select the `<username>` database.
 
-![glue17](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_17.PNG)
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage12.PNG)
 
-7. Under Map the source columns to target columns page,
+8. Choose the **taxi_parquet** table.
+9. Choose **Edit/Preview** data.
 
-   i. Under Target, change the Column name **tpep_pickup_datetime** to **pickup_date**. Click on its respective **data type** field string and change the Column type to **TIMESTAMP** and click on **Update**.
+> This is a crucial step. Please ensure you choose **Edit/Preview** data.
 
-   ii. Under Target, change the Column name **tpep_dropoff_datetime** to **dropoff_date**. Click on its respective **data type** field string and change the Column type to **TIMESTAMP** and click on **Update**.
+10. Under **Fields** on the left column, choose **New field**
 
-   iii. Click **Next**.
+    i. Select the **extract** operation from Function list.
 
-   iv. Verify the information and click **Save job and edit script**.
+    ii. Select **pickup_datetime** from the **Field list**.
 
-![glue9](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_9.PNG)
+    iii. For **Calculated field name**, type **hourofday**.
 
-8. On the auto-generated script page, click on **Save** and **Run Job**.
+    iv. Type ‘HH’ so the Formula is **extract('HH',{pickup_datetime})**
 
-![glue10](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_10.PNG)
+    v. Choose **Create** to add a field which is calculated from an existing field. In this case, the **hourofday** field is calculated from the **pickup_datetime filed** based on the specified formula.
 
-8. In the parameters pop-up, for Job bookmark, ensure its **Disable** and click on **Run Job**. 
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage13.PNG)
 
-9. This job will run for roughly 3 minutes.
+11. Choose **Save and Visualize** on top of the page.
 
-   ![glue11](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_11.PNG)
+## Visualizing the data using Amazon QuickSight
 
-10. You can view logs on the bottom page of the same page.
+Now that you have configured the data source and created a new filed to represent the hour of the day, in this section you will filter the data by year followed by month to visualize the taxi data for the entire month of January 2016 based on the **pickup_datetime** field.
 
-  ![glue12](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_12.PNG)
+### Add year based filter to visualize the dataset for the year 2016
 
-11. The target folder (S3 Bucket) specified above (step 6 iii) will now have the converted parquet data. 
+1. Ensure that current AWS region is **US West (Oregon)** region.
 
-## Query the Partitioned Data using Amazon Athena
+2. Under the **Fields List**, select the **year** field to show the distribution of fares per year.
 
-In regions where AWS Glue is supported, Athena uses the AWS Glue Data Catalog as a central location to store and retrieve table metadata throughout an AWS account. The Athena execution engine requires table metadata that instructs it where to read data, how to read it, and other information necessary to process the data. The AWS Glue Data Catalog provides a unified metadata repository across a variety of data sources and data formats, integrating not only with Athena, but with Amazon S3, Amazon RDS, Amazon Redshift, Amazon Redshift Spectrum, Amazon EMR, and any application compatible with the Apache Hive metastore.
+3. To reformat the **year** without comma
 
-1. Open the [AWS Management console for Amazon Athena](https://us-west-2.console.aws.amazon.com/athena/home?force&region=us-west-2). 
+   i. Select the dropdown arrow for the **year **field.
 
-   > Ensure you are in the **US West (Oregon)** region. 
+   ii. Select **Format 1,234.5678 **from the dropdown menu.
 
-2. Under Database, you should see the database `<username>` which was created during Lab 1. 
+   iii. Select **1235**.
 
-3. Click on **Create Table** right below the drop-down for Database and click on **Automatically (AWS Glue Crawler)**.
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage14.PNG)
 
-4. You will now be re-directed to the AWS Glue console to set up a crawler. The crawler connects to your data store and automatically determines its structure to create the metadata for your table. Click on **Continue**.
+4. To add a filter on the **year** filed, 
 
-5. Enter Crawler name as `<username>-crawler-yellow` and Click **Next**.
+   i. Select the dropdown for **year** field from the **Fields list**.
 
-6. Select Data store as **S3**.
+   ii. Select **Add filter to the field** from the dropdown menu.
 
-7. Choose Crawl data in **Specified path in my account**.
+5. To filter the data only for the year 2016
 
-8. For Include path, click on the folder Icon and choose the **target** folder previously made which contains the parquet data, created from the previous section, and click on **Next**.
+   i. Choose the new filter that you just created by clicking on **#** next to filter name **year** under the **Edit filter** menu.
+  
+   ii. Select **Filter list** for the two dropdowns under the filter name.
+  
+   iii. Deselect **Select All**.
+  
+   iv. Select only **2016**.
+  
+   v. Click **Apply**.
+  
+   vi. Click **Close**.
 
-![glue18](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_18.PNG)
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage16.PNG)
 
-9. In Add another data store, choose **No** and click on **Next**.
+### Add the month based filter for the month of January
 
-10. For Choose an IAM role, select Choose an existing IAM role, and in the drop-down pick the role made in the previous section, e.g. `<username>-glue-etl-role`, and click on **Next**.
+1. Ensure that current AWS region is **US West(Oregon)** region.
+2. Select **Visualize** from the navigation menu in the left-hand corner.
+3. Under the **Fields list**, deselect **year** by clicking on **year** field name.
+4. Select **month** by clicking on the **month** field name from the **Fields list**.
 
-11. In Create a schedule for this crawler, pick frequency as **Run on demand** and click on **Next**.
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage17.PNG)
 
-12. For Configure the crawler's output, under **Database**, click the drop-down and selerct the database used for Lab 1 and Lab 2, i.e. `<username>`. For **Prefix added to tables**, enter `<username>_new_` and click **Next**. 
+5. To filter the data set for the month of January (Month 1)
 
-13. Review the Crawler Info and click **Finish**. Click on **Run it Now?**. 
+   i. Select the dropdown arrow for **month** field under the **Fields List**.
 
-14. After the Crawler has finished, click on **Tables** on the left, and for database nycitytaxianalysis-reinv17-parquet you should see the table parq_target. Click on the table name and you will see the MetaData for this converted table. 
+   ii. Select **Add filter to the field**.
 
-15. Open the [AWS Management console for Amazon Athena](https://us-west-2.console.aws.amazon.com/athena/home?force&region=us-west-2). 
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage18.PNG)
 
-    > Ensure you are in the **US West (Oregon)** region. 
+6. To filter the data for month of January 2016 (Month 1),
 
-16. Under Database, select the `<username>` database and you should see under Tables, `<username>_new_yellow`. If not **Manually refresh the table list** by clicking the **Refresh** icon.
+   i. Choose the new filter that you just created by clicking on **#** next to filter name **month** under the **Edit Filter** menu.
+ 
+   ii. Select **Filter list** for the two dropdown lists, under the filter name.
+ 
+   iii. Deselect **ALL**.
+ 
+   iv. Select only **1**.
+ 
+   v. Click **Apply**
+ 
+   vi. Click **Close**.
 
-17. In the query editor on the right, type
+### Visualize the data by hour of day for the month of January 2016
 
-    ```
-    select count(*) from <username>_new_yellow;
-    ```
+1. Select **Visualize** from the navigation menu in the left-hand corner.
+2. Under the **Fields list**, deselect **month** by clicking on **month** field name.
+3. Select **hourofday** by clicking on the **hourofday** field name from the **Fields list**.
+4. Change the visual type to a line chart by selecting the line chart icon highlighted in the screenshot below under **Visual types**.
+5. Using the slider on x-axis, select the entire range [0,23] for **hourofday** field.
 
-    and take note the Run Time and Data scanned numbers here. 
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage19.PNG)
 
-    ![glue19](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_comp_scanresult.PNG)
+### Visualize the data for the month of January 2016 for all taxi types(yellow, green, fhv)
 
-    What we see is the Run time and Data scanned numbers for Amazon Athena to **query and scan the parquet data**.
+1. Click on the double drop-down arrow underneath your username at the top-right corner of the page to reveal **X-axis**, **Value** and **Color** under **Field wells**.
+2. Under the **Fields list**, deselect **hourofday** by clicking on **hourofday** field name.
+3. Select **pickup_datetime** for x-axis by clicking on the **pickup_datetime** field name from **Fields list**.
+4. Select **type** for Color by clicking on the **type** field name from **Fields list.**
 
-18. Now we compare the performance to the original table created in Lab 1. In the query editor on the right, type
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage20.PNG)
 
-    ```
-    select count(*) from <username>_yellow;
-    ```
+5. Click on the field name **pickup_datetime** in x-axis to reveal a sub-menu.
+6. Select **Aggregate:Day** to aggregate by day.
+7. Using the slider on x-axis, select the entire month of January 2016 for **pickup_datetime** field.
 
-    and take note the Run Time and Data scanned numbers here. 
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage21.PNG)
 
-    ![glue20](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab3/glue_uncomp_scanresult.PNG)
+> Note: The interesting outlier in the above graph is that on Jan23rd, 2016, you see the dip in the number of taxis across all types. Doing a quick google search for that date, gets us this weather article from NBC New York
+>
+> ![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage22.PNG)
 
-19. What we see is the Run time and Data scanned numbers for Amazon Athena to query and scan the **uncompressed**  data.
-
-<!--## Deleting the Glue database, crawlers and ETL Jobs created for this Lab
-
-Now that you have successfully discovered and analyzed the dataset using Amazon Glue and Amazon Athena, you need to delete the resources created as part of this lab. 
-
-1. Open the [AWS Management console for Amazon Glue](https://us-west-2.console.aws.amazon.com/glue/home?region=us-west-2#). Ensure you are in the Oregon region (as part of this lab).
-2. Click on **Databases** under Data Catalog column on the left. 
-3. Check the box for the Database that were created as part of this lab. Click on **Action** and select **Delete Database**. And click on **Delete**. This will also delete the tables under this database. 
-4. Click on **Crawlers** under Data Catalog column on the left. 
-5. Check the box for the crawler that were created as part of this lab. Click on **Action** and select **Delete Crawler**. And click on **Delete**. 
-6. Click on **Jobs** under ETL column on the left. 
-7. Check the box for the jobs that were created as part of this lab. Click on **Action** and select **Delete**. And click on **Delete**. 
-8. Open the [AWS Management console for Amazon S3](https://s3.console.aws.amazon.com/s3/home).
-9. Click on the S3 bucket that was created as part of this lab. You need to click on its corresponding **Bucket icon** to select the bucket instead of opening the bucket. Click on **Delete bucket** button on the top, to delete the S3 bucket. In the pop-up window, Type the name of the bucket (that was created as part of this lab), and click **Confirm**. -->
-
-## Summary
-
-In the lab, you went from data discovery to analyzing a canonical dataset, without starting and setting up a single server. You started by crawling a dataset you didn’t know anything about and the crawler told you the structure, columns, and counts of records.
-
-From there, you saw the datasets were in different formats, but represented the same thing: NY City Taxi rides. You then converted them into a canonical (or normalized) form that is easily queried through Athena and possible in QuickSight. Additionally, you can see that since Athena charges you by the amount of data scanned per query, you can save on costs and get better performance if you partition the data, compress data, or convert it to columnar formats such as Apache Parquet. The following table highlights this with the approximate results you should have seen from steps **18** and **19** above.
-
-|             |                    **Query**                   |   **Run Time**   | **Data Scanned** |   **Results**   |
-|-------------|:----------------------------------------------:|:----------------:|:----------------:|:---------------:|
-| **`<username>_new_yellow`**     | select count(*) from `<username>_new_yellow`     | ~1.1 seconds | 0KB       | 10906858 |
-| **`<username>_new`** | select count(*) from `<username>_yellow` | ~21.98 seconds  | ~1.59GB            | 10906858 |
+*Using Amazon QuickSight, you were able to see patterns across a time-series data by building visualizations, performing ad-hoc analysis, and quickly generating insights.*
 
 ---
-
 ## License
 
 This library is licensed under the Apache 2.0 License. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
