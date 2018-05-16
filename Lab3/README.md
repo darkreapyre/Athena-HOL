@@ -1,4 +1,4 @@
-# Lab 2: Visualization using Amazon QuickSight
+# Lab 3: Visualization using Amazon QuickSight
 
 <!--* [Create an Amazon S3 bucket](#create-an-amazon-s3-bucket)
 * [Creating Amazon Athena Database and Table](#creating-amazon-athena-database-and-table)

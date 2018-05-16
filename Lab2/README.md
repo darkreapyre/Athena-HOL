@@ -1,4 +1,4 @@
-# Lab 2: ETL and Data Discovery using Amazon Glue
+# Lab 3: ETL and Data Discovery using Amazon Glue
 
 * [Create an IAM Role](#create-an-iam-role)
 * [Create an Amazon S3 bucket](#create-an-amazon-s3-bucket)
