@@ -224,6 +224,7 @@ SELECT YEAR, count(1) as TotalCount from taxi_parquet GROUP BY YEAR
 ```
 
 Results for the above query look like the following:
+
 ![athenagroupbyyearquery-nytaxi.png](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab1/athenagroupbyyearquery-nytaxi.png)
 
 3. Choose **New Query**, copy the following statement into the query pane, and then choose **Run Query** to get the top 12 months by total number of rides across all the years
