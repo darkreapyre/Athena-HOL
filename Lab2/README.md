@@ -213,7 +213,7 @@ Now that you have configured the data source and created a new filed to represen
 
    i. Select the dropdown arrow for the **year **field.
 
-   ii. Select **Format 1,234.5678 **from the dropdown menu.
+   ii. Select **Format 1,234.5678** from the dropdown menu.
 
    iii. Select **1235**.
 
@@ -256,8 +256,6 @@ Now that you have configured the data source and created a new filed to represen
 
    ii. Select **Add filter to the field**.
 
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage18.PNG)
-
 6. To filter the data for month of January 2016 (Month 1),
 
    i. Choose the new filter that you just created by clicking on **#** next to filter name **month** under the **Edit Filter** menu.
@@ -271,6 +269,8 @@ Now that you have configured the data source and created a new filed to represen
    v. Click **Apply**
  
    vi. Click **Close**.
+
+![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage18.PNG)
 
 ### Visualize the data by hour of day for the month of January 2016
 
