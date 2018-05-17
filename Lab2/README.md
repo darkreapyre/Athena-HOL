@@ -3,8 +3,8 @@
 <!--* [Create an Amazon S3 bucket](#create-an-amazon-s3-bucket)
 * [Creating Amazon Athena Database and Table](#creating-amazon-athena-database-and-table)
     * [Create Athena Database](#create-database)
-    * [Create Athena Table](#create-a-table)
-* [Signing up for Amazon QuickSight Standard Edition](#signing-up-for-amazon-quicksight-standard-edition)-->
+    * [Create Athena Table](#create-a-table)-->
+* [Signing in to Amazon QuickSight Standard Edition for the first time](#signing-up-for-amazon-quicksight-standard-edition)-->
 * [Configuring Amazon QuickSight to use Amazon Athena as data source](#configuring-amazon-quicksight-to-use-amazon-athena-as-data-source)
 * [Visualizing the data using Amazon QuickSight](#visualizing-the-data-using-amazon-quicksight)
     * [Add year based filter to visualize the dataset for the year 2016](#add-year-based-filter-to-visualize-the-dataset-for-the-year-2016)
@@ -101,20 +101,23 @@ Now that you have created the table you need to add the partition metadata to th
 ```sql
     MSCK REPAIR TABLE NYTaxiRides
 ```
-The returned result will contain information for the partitions that are added to NYTaxiRides for each taxi type (yellow, green, fhv) for every month for the year from 2009 to 2016.
+The returned result will contain information for the partitions that are added to NYTaxiRides for each taxi type (yellow, green, fhv) for every month for the year from 2009 to 2016.-->
 
-## Signing up for Amazon Quicksight Standard Edition
+## Signing in to  Amazon Quicksight Standard Edition for the first time
 
 1. Open the [AWS ManagementConsole for QuickSight](https://us-east-1.quicksight.aws.amazon.com/sn/start).
 
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage1.PNG)
+<!--[image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage1.PNG)-->
 
-2. If this is the first time you are accessing QuickSight, you will see a sign-up landing page for QuickSight. 
-3. Click on **Sign up for QuickSight**.
+2. If this is the first time you are accessing QuickSight, you will see a welcome landing page for QuickSight. 
+
+![image](https://s3-us-west-2.amazonaws.com/athena-hol-722812380636-us-west-2/assets/Welcome.png)
+
+3. Enter your **Email address** and click **Continue**.
 
 > **Note:** Chrome browser might timeout at this step. If that's the case, try this step in Firefox/Microsoft Edge/Safari.
 
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage2.PNG)
+<!--![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage2.PNG)
 
 4. On the next page, for the subscription type select the **"Standard Edition"** and click **Continue**. 
 
@@ -161,24 +164,29 @@ The returned result will contain information for the partitions that are added t
 1. Click on the region icon on the top-right corner of the page, and select **US West (Oregon)**. 
 2. Click on **Manage data** on the top-right corner of the webpage to review existing data sets. 
 
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage9.PNG)
+<!--![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage9.PNG)-->
+![image](https://s3-us-west-2.amazonaws.com/athena-hol-722812380636-us-west-2/assets/data.png)
 
 3. Click on **New data set** on the top-left corner of the webpage and review the options. 
 
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage10.PNG)
+<!--![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage10.PNG)-->
+![image](https://s3-us-west-2.amazonaws.com/athena-hol-722812380636-us-west-2/assets/dataset.png)
 
 4. Select **Athena** as a Data source.
 
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage11.PNG)
+<!--![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage11.PNG)-->
+![image](https://s3-us-west-2.amazonaws.com/athena-hol-722812380636-us-west-2/assets/athenasource.png)
 
 5. Enter the **Data source** **name** (e.g. *user1Athena*).
 6. Click **Create data source**.
 7. Select the `<username>` database.
 
-![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage12.PNG)
+<!--![image](https://s3-us-west-2.amazonaws.com/reinvent2017content-abd313/lab2/qsimage12.PNG)-->
 
 8. Choose the `taxi_parquet` table.
 9. Choose **Edit/Preview** data.
+
+![image](https://s3-us-west-2.amazonaws.com/athena-hol-722812380636-us-west-2/assets/table.png)
 
 >**Note:** This is a crucial step. Please ensure you choose **Edit/Preview** data.
 
