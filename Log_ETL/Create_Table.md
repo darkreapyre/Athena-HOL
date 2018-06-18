@@ -1,3 +1,5 @@
+# Sample Athena Table Creation
+
 ```sql
 CREATE EXTERNAL TABLE IF NOT EXISTS gopro.etl_test (
   `contianer` string,
