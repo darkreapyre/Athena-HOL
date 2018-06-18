@@ -1,4 +1,4 @@
-# Sample Athena Table Creation
+# Sample Athena Table Creation - ORC
 
 ```sql
 CREATE EXTERNAL TABLE IF NOT EXISTS gopro.etl_test (
