@@ -48,7 +48,7 @@ The AWS region name is always listed in the upper-right corner of the AWS Manage
 |---|----|
 |Lab 1|[Analysis of data in Amazon S3 using Amazon Athena](./Lab1)|
 |Lab 2|[Visualization using Amazon QuickSight](./Lab2)|
-|Lab 3|[ ETL and Data Discovery using Amazon Glue](./Lab4)|
+|Lab 3|[ ETL and Data Discovery using Amazon Glue](./Lab3)|
 
 
 ## AMAZON ATHENA
